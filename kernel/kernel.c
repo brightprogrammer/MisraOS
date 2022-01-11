@@ -1,4 +1,14 @@
+/**
+ *@file kernel.c
+ *@author Siddharth Mishra (brightprogrammer)
+ *@date 01/08/2022
+ *@brief Contains kernel entry point code and init code.
+ **/
+
 #include "kernel.h"
+#include "renderer.h"
+#include "string.h"
+#include "gdt.h"
 
 // we cannot dynamically allocate anything now
 // so will initialize stack as an array in .bss and tell stivale
@@ -74,6 +84,12 @@ void *stivale2_get_tag(struct stivale2_struct *stivale2_struct, uint64_t id) {
     }
 }
 
+void hang(){
+    for(;;){
+        asm("hlt");
+    }
+}
+
 // The following will be our kernel's entry point.
 void _start(struct stivale2_struct *stivale2_struct) {
   // Let's get the terminal structure tag from the bootloader.
@@ -82,14 +98,44 @@ void _start(struct stivale2_struct *stivale2_struct) {
 
     // Check if the tag was actually found.
     if (framebuffer_tag == NULL) {
-        // It wasn't found, just hang...
-        for (;;) {
-            asm ("hlt");
-        }
+        hang();
     }
 
-    // get address of framebuffer
-    uintptr_t fb_addr = framebuffer_tag->framebuffer_addr;
+    // get framebuffer details
+    framebuffer_t framebuffer;
+    framebuffer.address = (uint32_t*)framebuffer_tag->framebuffer_addr;
+    framebuffer.width = framebuffer_tag->framebuffer_width;
+    framebuffer.height = framebuffer_tag->framebuffer_height;
+
+    // prepare renderer
+    font_renderer_t font_renderer;
+    // create font renderer for this framebuffer
+    font_renderer = create_font_renderer(framebuffer);
+    // set default font renderer
+    set_default_font_renderer(&font_renderer);
+
+    // draw this string onto the screen
+    draw_string("Misra OS | Copyright Siddharth Mishra (c) 2022 | All Rights Reserved\n\n");
+
+    // get the memmap tag given to kernel by the bootloader
+    struct stivale2_struct_tag_memmap *memmap_tag;
+    memmap_tag = stivale2_get_tag(stivale2_struct, STIVALE2_STRUCT_TAG_MEMMAP_ID);
+
+    // check if tag is valid
+    if(memmap_tag == NULL){
+        font_renderer.foreground_colour = 0xffff0000;
+        draw_string("[-] Failed to get memory map.");
+
+        hang();
+    }else{
+        draw_string("[+] Got the memory map.\n");
+    }
+
+
+    // load gdt
+    draw_string("[+] Initializing Global Descriptor Table...\n");
+    initialize_global_descriptor_table();
+    draw_string("[+] Initializing Global Descriptor Table... Complete!\n");
 
     // We're done, just hang...
     for (;;) {

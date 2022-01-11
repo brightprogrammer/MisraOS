@@ -38,7 +38,7 @@ parted -s misra.hdd mkpart ESP fat32 2048s 100%
 parted -s misra.hdd set 1 esp on
 
 # Build limine-install.
-make -C limine
+# make -C limine
 
 # Install the Limine BIOS stages onto misra
 limine/build/bin/limine-install misra.hdd

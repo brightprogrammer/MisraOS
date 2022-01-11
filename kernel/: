@@ -1,16 +1,11 @@
-# set assembly compile options
-# set(CMAKE_ASM_FLAGS "${CFLAGS}")
-
-
-# set sources
 set(KERNEL_SRCS "kernel.c" "renderer.c" "font.c" "string.c"
-                "gdt.c")
+                "gdt.c" "gdt.asm")
 
 # make kernel as executable
 add_executable(kernel ${KERNEL_SRCS})
 
 # set compile options
-target_compile_options(kernel PRIVATE   -Wall -Wextra -O3
+target_compile_options(kernel PRIVATE    -Wall -Wextra -O2
                                         -ffreestanding
                                         -fno-stack-protector
                                         -fno-pic -fpie
