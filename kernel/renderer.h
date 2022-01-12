@@ -11,6 +11,9 @@
 #include <stdint.h>
 #include "font.h"
 
+// size of single \t
+#define TAB_SIZE 4
+
 // basic framebuffer information
 // a framebuffer is where renderer draws things
 typedef struct {
@@ -47,6 +50,5 @@ void draw_character(char c);
 // draw a complete string using the default renderer
 // NOTE: You need to set a default renderer before using this
 void draw_string(const char* str);
-
 
 #endif // RENDERER_H_

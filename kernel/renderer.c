@@ -76,11 +76,10 @@ void renderer_draw_string(font_renderer_t* font_renderer, const char* str){
             continue;
         }
 
-        // draw character
-        renderer_draw_character(font_renderer, str[i]);
-
-        // keep increasing position
-        font_renderer->xpos += font_renderer->font.font_width;
+        if(str[i] == '\t'){
+            font_renderer->xpos += TAB_SIZE * font_renderer->font.font_width;
+            continue;
+        }
 
         // wrap text
         if(font_renderer->xpos >= font_renderer->framebuffer.width){
@@ -90,7 +89,14 @@ void renderer_draw_string(font_renderer_t* font_renderer, const char* str){
 
         if(font_renderer->ypos >= font_renderer->framebuffer.height){
             font_renderer->ypos = 0;
+            font_renderer->xpos = 0;
         }
+
+        // draw character
+        renderer_draw_character(font_renderer, str[i]);
+
+        // keep increasing position
+        font_renderer->xpos += font_renderer->font.font_width;
     }
 }
 

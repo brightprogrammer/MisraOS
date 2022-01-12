@@ -10,10 +10,12 @@
 #include "string.h"
 #include "gdt.h"
 
+#define KB * 1024
+
 // we cannot dynamically allocate anything now
 // so will initialize stack as an array in .bss and tell stivale
 // where our stack is
-static uint8_t stack[8192]; // 8kb stack
+static uint8_t stack[16 KB]; // 8kb stack
 
 // we need a framebuffer from stivale on bootup so we
 // need to tell stivale that we need a framebuffer instead of
@@ -115,7 +117,7 @@ void _start(struct stivale2_struct *stivale2_struct) {
     set_default_font_renderer(&font_renderer);
 
     // draw this string onto the screen
-    draw_string("Misra OS | Copyright Siddharth Mishra (c) 2022 | All Rights Reserved\n\n");
+    draw_string("Misra OS | Copyright Siddharth Mishra (c) 2022 | MIT License\n\n");
 
     // get the memmap tag given to kernel by the bootloader
     struct stivale2_struct_tag_memmap *memmap_tag;
@@ -131,6 +133,27 @@ void _start(struct stivale2_struct *stivale2_struct) {
         draw_string("[+] Got the memory map.\n");
     }
 
+    // print number of memmap entries
+    draw_string("[+] Number of memmap entries : ");
+    draw_string(utostr(memmap_tag->entries));
+    draw_string("\n");
+
+    for(size_t i = 0; i < memmap_tag->entries; i++){
+        if((memmap_tag->memmap[i].type == STIVALE2_MMAP_USABLE) ||
+           (memmap_tag->memmap[i].type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE)){
+
+            draw_string("[+] MEMMAP Entry\n");
+            draw_string("\tBase : 0x"); draw_string(utohexstr(memmap_tag->memmap[i].base));
+            draw_string("\n\tLength: 0x"); draw_string(utohexstr(memmap_tag->memmap[i].length));
+            draw_string("\n");
+
+            if(memmap_tag->memmap[i].type == STIVALE2_MMAP_USABLE){
+                draw_string("\tType : USABLE\n");
+            }else if(memmap_tag->memmap[i].type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE){
+                draw_string("\tType : BOOTLOADER_RECLAIMABLE\n");
+            }
+        }
+    }
 
     // load gdt
     draw_string("[+] Initializing Global Descriptor Table...\n");

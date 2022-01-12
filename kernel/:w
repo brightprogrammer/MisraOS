@@ -1,0 +1,120 @@
+#/**
+ *@file string.c
+ *@author Siddharth Mishra (brightprogrammer)
+ *@date 01/10/22
+ *@brief Provide basic string utilities to kernel
+ **/
+
+#include "string.h"
+
+char int_to_string_buffer[128];
+
+// get length of string
+size_t strlen(const char* str){
+    size_t sz = 0;
+    while(*(str + sz)){
+        sz++;
+    }
+
+    return sz;
+}
+
+// convert uint8_t to string
+const char* u8_to_str(uint8_t n){
+    // get size of string
+    uint8_t digits = 1;
+    uint8_t x = n;
+    while ((x /= 10) > 0)
+        digits++;
+
+    // convert to string
+    x = n;
+    for(int8_t index = digits - 1; index >= 0; index--){
+        int_to_string_buffer[index] = (x % 10) + '0';
+        x /= 10;
+    }
+
+    // null terminate string
+    int_to_string_buffer[digits] = '\0';
+
+    return int_to_string_buffer;
+}
+
+// convert uint16_t to string
+const char* u16_to_str(uint16_t n){
+    // get size of string
+    uint8_t digits = 1;
+    uint16_t x = n;
+    while ((x /= 10) > 0)
+        digits++;
+
+    // convert to string
+    x = n;
+    for(int8_t index = digits - 1; index >= 0; index--){
+        int_to_string_buffer[index] = (x % 10) + '0';
+        x /= 10;
+    }
+
+    // null terminate string
+    int_to_string_buffer[digits] = '\0';
+
+    return int_to_string_buffer;
+}
+
+// convert uint32_t to string
+const char* u32_to_str(uint32_t n){
+    // get size of string
+    uint8_t digits = 1;
+    uint32_t x = n;
+    while ((x /= 10) > 0)
+        digits++;
+
+    // convert to string
+    x = n;
+    for(int8_t index = digits - 1; index >= 0; index--){
+        int_to_string_buffer[index] = (x % 10) + '0';
+        x /= 10;
+    }
+
+    // null terminate string
+    int_to_string_buffer[digits] = '\0';
+
+    return int_to_string_buffer;
+}
+
+// convert uint64_t to string
+const char* u64_to_str(uint64_t n){
+    // get size of string
+    uint8_t digits = 1;
+    uint64_t x = n;
+    while ((x /= 10) > 0)
+        digits++;
+
+    // convert to string
+    x = n;
+    for(int8_t index = digits - 1; index >= 0; index--){
+        int_to_string_buffer[index] = (x % 10) + '0';
+        x /= 10;
+    }
+
+    // null terminate string
+    int_to_string_buffer[digits] = '\0';
+
+    return int_to_string_buffer;
+}
+
+// convert uint64_t to string
+const char* u64_to_hex_str(uint64_t n){
+    uint8_t size = 16;
+    uint64_t x = n;
+
+    for(uint8_t i = 0; i < 16; i++){
+        uint8_t last_nibble = (uint8_t)x;
+        x >> 4;
+    }
+
+    // null terminate string
+    int_to_string_buffer[size] = '\0';
+
+    return int_to_string_buffer;
+}
