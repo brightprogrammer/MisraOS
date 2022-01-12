@@ -7,3 +7,5 @@ tmp/
 limine/build
 misra.hdd
 build/
+sys_root/
+disk_root/
