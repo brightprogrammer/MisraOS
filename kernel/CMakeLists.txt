@@ -10,7 +10,7 @@ set(KERNEL_SRCS "kernel.c" "renderer.c" "font.c" "string.c"
 add_executable(kernel ${KERNEL_SRCS})
 
 # set compile options
-target_compile_options(kernel PRIVATE   -Wall -Wextra -O3
+target_compile_options(kernel PRIVATE   -Wall -Wextra -O0 -g
                                         -ffreestanding
                                         -fno-stack-protector
                                         -fno-pic -fpie

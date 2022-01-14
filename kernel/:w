@@ -9,12 +9,12 @@
 #include "gdt.h"
 
 // create default gdt
-static __attribute__((aligned(0x1000))) gdt_t default_gdt;
+__attribute__((aligned(0x1000))) gdt_t default_gdt;
 // pointer to global_descriptor table
-static gdt_pointer_t gdt_pointer;
+gdt_pointer_t gdt_pointer;
 
 // load gdt address in gdtr register
-void load_gdt(){
+void load_gdt(gdt_pointer_t* gdt_pointer){
     // load gdtr
     asm volatile("lgdt %0"
                  :
@@ -25,7 +25,6 @@ void load_gdt(){
                  "push %%rax\n"
                  "lretq\n"
                  "1:\n" // 1: is an anonymous label, we will jump to this using the lretq instruction above
-                 :
                  :
                  : "rax", "memory");
     // point to data segment
@@ -68,5 +67,5 @@ void initialize_global_descriptor_table(){
     default_gdt.user_data = create_gdt_entry(0xf2, 0x00);
 
     // reload gdt address in gdtr
-    load_gdt();
+    load_gdt(&gdt_pointer);
 }

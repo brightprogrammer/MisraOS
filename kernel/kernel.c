@@ -141,25 +141,27 @@ void _start(struct stivale2_struct *stivale2_struct) {
         draw_string("[+] Got the memory map.\n");
     }
 
-    /* // print status */
-    /* draw_string("[+] Initializing memory allocator...\n"); */
-    /* initialize_memory_manager(memmap_tag); */
-    /* draw_string("[+] Initializing memory allocator... Complete\n"); */
+    // print status
+    draw_string("[+] Initializing memory allocator...\n");
+    initialize_memory_manager(memmap_tag);
+    draw_string("[+] Initializing memory allocator... Complete\n");
 
-    /* // create bitmap */
-    /* uint8_t bmp_buf[2] = {0}; */
-    /* bitmap_t bmp = {2, bmp_buf}; */
+    // create bitmap
+    uint8_t bmp_buf[2] = {0};
+    bitmap_t bmp = {2, bmp_buf};
 
-    /* for(uint8_t i = 0; i < 8; i++){ */
-    /*     if(i % 2){ */
-    /*         bitmap_set_bit(&bmp, i, true); */
-    /*     } */
-    /* } */
+    asm volatile (".byte 0xeb, 0xef");
 
-    /* for(uint8_t i = 0; i < 8; i++){ */
-    /*     if(bitmap_get_bit(&bmp, i)) draw_string("true\t"); */
-    /*     else draw_string("false\t"); */
-    /* } */
+    for(uint8_t i = 0; i < 8; i++){
+        if(i % 2){
+            bitmap_set_bit(&bmp, i, true);
+        }
+    }
+
+    for(uint8_t i = 0; i < 8; i++){
+        if(bitmap_get_bit(&bmp, i)) draw_string("true\t");
+        else draw_string("false\t");
+    }
 
     // We're done, just hang...
     for (;;) {

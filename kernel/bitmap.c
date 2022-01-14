@@ -10,7 +10,7 @@
 
 void bitmap_set_bit(bitmap_t *bitmap, uint64_t idx, bool value){
     // check if given index is in range of bitmap size
-    if(bitmap->size > idx / 8)
+    if(bitmap->size > (idx / 8))
         return;
 
     // index of byte that contains the bit for given index
@@ -24,16 +24,14 @@ void bitmap_set_bit(bitmap_t *bitmap, uint64_t idx, bool value){
     }else{
         // if the bit is already flagged then xor it with 1 to set it off
         // else leave it off
-        if((bitmap->buffer[buf_idx] >> bit_offset) & 0x1){
-            bitmap->buffer[buf_idx] = bitmap->buffer[buf_idx] ^ (1 << bit_offset);
-        }
+        bitmap->buffer[buf_idx] = bitmap->buffer[buf_idx] & (~(1 << bit_offset));
     }
 }
 
 // if idx is out of range then false is returned
 bool bitmap_get_bit(bitmap_t *bitmap, uint64_t idx){
     // check if index is in range
-    if(bitmap->size > idx / 8)
+    if(bitmap->size > (idx / 8))
         return false;
 
     // index of byte that contains the bit for given index
