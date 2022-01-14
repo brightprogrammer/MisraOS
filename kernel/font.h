@@ -3,6 +3,7 @@
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/09/2022
  *@brief Manage fonts.
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
  **/
 
 #ifndef FONT_H_

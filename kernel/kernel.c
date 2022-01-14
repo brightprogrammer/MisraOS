@@ -3,19 +3,22 @@
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/08/2022
  *@brief Contains kernel entry point code and init code.
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
  **/
 
 #include "kernel.h"
 #include "renderer.h"
 #include "string.h"
 #include "gdt.h"
+#include "memory.h"
+#include "bitmap.h"
 
-#define KB * 1024
+#define KB 1024
 
 // we cannot dynamically allocate anything now
 // so will initialize stack as an array in .bss and tell stivale
 // where our stack is
-static uint8_t stack[16 KB]; // 8kb stack
+static uint8_t stack[16*KB];
 
 // we need a framebuffer from stivale on bootup so we
 // need to tell stivale that we need a framebuffer instead of
@@ -119,6 +122,11 @@ void _start(struct stivale2_struct *stivale2_struct) {
     // draw this string onto the screen
     draw_string("Misra OS | Copyright Siddharth Mishra (c) 2022 | MIT License\n\n");
 
+    // load gdt
+    draw_string("[+] Initializing Global Descriptor Table...\n");
+    initialize_global_descriptor_table();
+    draw_string("[+] Initializing Global Descriptor Table... Complete!\n");
+
     // get the memmap tag given to kernel by the bootloader
     struct stivale2_struct_tag_memmap *memmap_tag;
     memmap_tag = stivale2_get_tag(stivale2_struct, STIVALE2_STRUCT_TAG_MEMMAP_ID);
@@ -133,32 +141,25 @@ void _start(struct stivale2_struct *stivale2_struct) {
         draw_string("[+] Got the memory map.\n");
     }
 
-    // print number of memmap entries
-    draw_string("[+] Number of memmap entries : ");
-    draw_string(utostr(memmap_tag->entries));
-    draw_string("\n");
+    /* // print status */
+    /* draw_string("[+] Initializing memory allocator...\n"); */
+    /* initialize_memory_manager(memmap_tag); */
+    /* draw_string("[+] Initializing memory allocator... Complete\n"); */
 
-    for(size_t i = 0; i < memmap_tag->entries; i++){
-        if((memmap_tag->memmap[i].type == STIVALE2_MMAP_USABLE) ||
-           (memmap_tag->memmap[i].type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE)){
+    /* // create bitmap */
+    /* uint8_t bmp_buf[2] = {0}; */
+    /* bitmap_t bmp = {2, bmp_buf}; */
 
-            draw_string("[+] MEMMAP Entry\n");
-            draw_string("\tBase : 0x"); draw_string(utohexstr(memmap_tag->memmap[i].base));
-            draw_string("\n\tLength: 0x"); draw_string(utohexstr(memmap_tag->memmap[i].length));
-            draw_string("\n");
+    /* for(uint8_t i = 0; i < 8; i++){ */
+    /*     if(i % 2){ */
+    /*         bitmap_set_bit(&bmp, i, true); */
+    /*     } */
+    /* } */
 
-            if(memmap_tag->memmap[i].type == STIVALE2_MMAP_USABLE){
-                draw_string("\tType : USABLE\n");
-            }else if(memmap_tag->memmap[i].type == STIVALE2_MMAP_BOOTLOADER_RECLAIMABLE){
-                draw_string("\tType : BOOTLOADER_RECLAIMABLE\n");
-            }
-        }
-    }
-
-    // load gdt
-    draw_string("[+] Initializing Global Descriptor Table...\n");
-    initialize_global_descriptor_table();
-    draw_string("[+] Initializing Global Descriptor Table... Complete!\n");
+    /* for(uint8_t i = 0; i < 8; i++){ */
+    /*     if(bitmap_get_bit(&bmp, i)) draw_string("true\t"); */
+    /*     else draw_string("false\t"); */
+    /* } */
 
     // We're done, just hang...
     for (;;) {

@@ -3,6 +3,7 @@
  *@author Siddharth Mishra
  *@date 01/11/22
  *@brief global descriptor table function definitions
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
  **/
 
 #ifndef GDT_H_
@@ -51,7 +52,6 @@ typedef struct {
     gdt_entry_t null;
     gdt_entry_t kernel_code;
     gdt_entry_t kernel_data;
-    gdt_entry_t user_null;
     gdt_entry_t user_code;
     gdt_entry_t user_data;
 } __attribute__((packed)) __attribute__((aligned(0x1000))) gdt_t;

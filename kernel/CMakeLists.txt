@@ -4,7 +4,7 @@
 
 # set sources
 set(KERNEL_SRCS "kernel.c" "renderer.c" "font.c" "string.c"
-                "gdt.c")
+                "gdt.c" "bitmap.c" "memory.c")
 
 # make kernel as executable
 add_executable(kernel ${KERNEL_SRCS})
