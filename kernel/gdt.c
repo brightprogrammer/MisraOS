@@ -3,7 +3,7 @@
  *@author Siddharth Mishra
  *@date 01/11/22
  *@brief global descriptor table function definitions
- *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
 #include "gdt.h"

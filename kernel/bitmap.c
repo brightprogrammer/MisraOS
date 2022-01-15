@@ -3,7 +3,7 @@
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/14/2022
  *@brief Bitmap helps us store 8 bools in one byte.
- *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
 #include "bitmap.h"

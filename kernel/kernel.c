@@ -3,7 +3,7 @@
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/08/2022
  *@brief Contains kernel entry point code and init code.
- *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
 #include "kernel.h"

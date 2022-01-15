@@ -3,7 +3,7 @@
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/10/22
  *@brief Provide basic string utilities to kernel
- *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
 #ifndef STRING_H_
