@@ -269,6 +269,6 @@ static uint8_t font_bitmap_array[4096] = {
 };
 
 // return the static array
-uint8_t* get_font_bitmap_array(){
+uint8_t* getFontBitmapArray(){
     return font_bitmap_array;
 }

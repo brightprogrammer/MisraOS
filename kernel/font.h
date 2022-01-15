@@ -15,13 +15,13 @@
 #define FONT_HEIGHT 16
 
 // return the statically defined font array
-uint8_t* get_font_bitmap_array();
+uint8_t* getFontBitmapArray();
 
 // contains basic font related information
 typedef struct {
     uint8_t *bitmap;
     uint8_t font_width;
     uint8_t font_height;
-} font_t;
+} Font;
 
 #endif // FONT_H_

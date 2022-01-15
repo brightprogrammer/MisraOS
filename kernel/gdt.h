@@ -15,7 +15,7 @@
 typedef struct{
     uint16_t table_limit;
     uint64_t table_base_address;
-} __attribute__((packed)) gdt_pointer_t;
+} __attribute__((packed)) GDTR;
 
 // implementation of a general segment descriptor
 typedef struct {
@@ -46,17 +46,17 @@ typedef struct {
 
     // finally the higher part of base_address
     uint8_t base_address_high;
-} __attribute__((packed)) gdt_entry_t;
+} __attribute__((packed)) GDTEntry;
 
 typedef struct {
-    gdt_entry_t null;
-    gdt_entry_t kernel_code;
-    gdt_entry_t kernel_data;
-    gdt_entry_t user_code;
-    gdt_entry_t user_data;
-} __attribute__((packed)) __attribute__((aligned(0x1000))) gdt_t;
+    GDTEntry null;
+    GDTEntry kernel_code;
+    GDTEntry kernel_data;
+    GDTEntry user_code;
+    GDTEntry user_data;
+} __attribute__((packed)) __attribute__((aligned(0x1000))) GDT;
 
 // initialize global descriptor table
-void initialize_global_descriptor_table();
+void initGDT();
 
 #endif // GDT_H_

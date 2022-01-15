@@ -18,13 +18,13 @@ typedef struct {
     // size of buffer and not the number of booleans required
     size_t size;
     uint8_t *buffer;
-} bitmap_t;
+} Bitmap;
 
 // get bitmap bit from given bitmap at given index
 // if index is out of range the false is returned
-bool bitmap_get_bit(bitmap_t *bitmap, uint64_t idx);
+bool bitmapGetBit(Bitmap *bitmap, uint64_t idx);
 // set bitmap bit of given bitmap at given index
 // if index is out of range then nothing is set (early return)
-void bitmap_set_bit(bitmap_t *bitmap, uint64_t idx, bool value);
+void bitmapSetBit(Bitmap *bitmap, uint64_t idx, bool value);
 
 #endif // BITMAP_H_

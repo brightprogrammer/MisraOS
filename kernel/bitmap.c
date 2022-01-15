@@ -3,14 +3,14 @@
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/14/2022
  *@brief Bitmap helps us store 8 bools in one byte.
- r@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY 3.0
  **/
 
 #include "bitmap.h"
 
-void bitmap_set_bit(bitmap_t *bitmap, uint64_t idx, bool value){
+void bitmapSetBit(Bitmap *bitmap, uint64_t idx, bool value){
     // check if given index is in range of bitmap size
-    if(bitmap->size > (idx / 8))
+    if(bitmap->size < (idx / 8))
         return;
 
     // index of byte that contains the bit for given index
@@ -29,9 +29,9 @@ void bitmap_set_bit(bitmap_t *bitmap, uint64_t idx, bool value){
 }
 
 // if idx is out of range then false is returned
-bool bitmap_get_bit(bitmap_t *bitmap, uint64_t idx){
+bool bitmapGetBit(Bitmap *bitmap, uint64_t idx){
     // check if index is in range
-    if(bitmap->size > (idx / 8))
+    if(bitmap->size < (idx / 8))
         return false;
 
     // index of byte that contains the bit for given index

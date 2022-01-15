@@ -107,25 +107,25 @@ void _start(struct stivale2_struct *stivale2_struct) {
     }
 
     // get framebuffer details
-    framebuffer_t framebuffer;
+    Framebuffer framebuffer;
     framebuffer.address = (uint32_t*)framebuffer_tag->framebuffer_addr;
     framebuffer.width = framebuffer_tag->framebuffer_width;
     framebuffer.height = framebuffer_tag->framebuffer_height;
 
     // prepare renderer
-    font_renderer_t font_renderer;
+    FontRenderer fontRenderer;
     // create font renderer for this framebuffer
-    font_renderer = create_font_renderer(framebuffer);
+    fontRenderer = createFontRenderer(framebuffer);
     // set default font renderer
-    set_default_font_renderer(&font_renderer);
+    setDefaultFontRenderer(&fontRenderer);
 
     // draw this string onto the screen
-    draw_string("Misra OS | Copyright Siddharth Mishra (c) 2022 | MIT License\n\n");
+    drawString("Misra OS | Copyright Siddharth Mishra (c) 2022 | MIT License\n\n");
 
     // load gdt
-    draw_string("[+] Initializing Global Descriptor Table...\n");
-    initialize_global_descriptor_table();
-    draw_string("[+] Initializing Global Descriptor Table... Complete!\n");
+    drawString("[+] Initializing Global Descriptor Table...\n");
+    initGDT();
+    drawString("[+] Initializing Global Descriptor Table... Complete!\n");
 
     // get the memmap tag given to kernel by the bootloader
     struct stivale2_struct_tag_memmap *memmap_tag;
@@ -133,34 +133,34 @@ void _start(struct stivale2_struct *stivale2_struct) {
 
     // check if tag is valid
     if(memmap_tag == NULL){
-        font_renderer.foreground_colour = 0xffff0000;
-        draw_string("[-] Failed to get memory map.");
+        fontRenderer.foregroundColour = 0xffff0000;
+        drawString("[-] Failed to get memory map.");
 
         hang();
     }else{
-        draw_string("[+] Got the memory map.\n");
+        drawString("[+] Got the memory map.\n");
     }
 
     // print status
-    draw_string("[+] Initializing memory allocator...\n");
-    initialize_memory_manager(memmap_tag);
-    draw_string("[+] Initializing memory allocator... Complete\n");
+    drawString("[+] Initializing memory allocator...\n");
+    initMemoryManager(memmap_tag);
+    drawString("[+] Initializing memory allocator... Complete\n");
 
     // create bitmap
-    uint8_t bmp_buf[2] = {0};
-    bitmap_t bmp = {2, bmp_buf};
+    uint8_t bmpBuf[2] = {0};
+    Bitmap bmp = {2, bmpBuf};
 
-    asm volatile (".byte 0xeb, 0xef");
+    //asm volatile (".byte 0xeb, 0xef");
 
     for(uint8_t i = 0; i < 8; i++){
         if(i % 2){
-            bitmap_set_bit(&bmp, i, true);
+            bitmapSetBit(&bmp, i, true);
         }
     }
 
     for(uint8_t i = 0; i < 8; i++){
-        if(bitmap_get_bit(&bmp, i)) draw_string("true\t");
-        else draw_string("false\t");
+        if(bitmapGetBit(&bmp, i)) drawString("true\t");
+        else drawString("false\t");
     }
 
     // We're done, just hang...
