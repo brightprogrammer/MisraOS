@@ -74,19 +74,30 @@ const char* utostr(uint64_t n){
 
 // convert uint64_t to hex string
 const char* utohexstr(uint64_t n){
-    uint8_t size = 16;
+    // calculate size of hex string
+    uint8_t size = 0;
+    uint64_t x = n;
+    while(x){
+        x >>= 4;
+        size++;
+    }
 
+    // hex digits in characters
     const char* hex_digits = "0123456789abcdef";
 
-    uint64_t x = n;
+    x = n;
     for(int8_t i = size - 1; i >= 0; i--){
+        // null terminate string in the end
+        if(x == 0){
+            int_to_string_buffer[i] = 0;
+            break;
+        }
+
+        // get lowest nibble and convert it to corresponding hex value
         uint8_t first_nibble = (uint8_t)x & 0x0f;
         int_to_string_buffer[i] = hex_digits[first_nibble];
         x = x >> 4;
     }
-
-    // null terminate string
-    int_to_string_buffer[size] = '\0';
 
     return int_to_string_buffer;
 }
