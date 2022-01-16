@@ -143,19 +143,6 @@ void _start(struct stivale2_struct *stivale2_struct) {
 
     //asm volatile (".byte 0xeb, 0xef");
 
-    // create PFA
-    createPageFrameAllocator(memmap_tag->entries, memmap_tag->memmap);
-
-    // print stats
-    printMemoryStats();
-
-    // allocate some memory
-    // allocate 10 pages
-    allocatePages(findFreePage(), 10);
-
-    // print stats again
-    printMemoryStats();
-
     // We're done, just hang...
     for (;;) {
         asm ("hlt");
