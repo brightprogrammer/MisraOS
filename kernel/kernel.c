@@ -12,6 +12,7 @@
 #include "gdt.h"
 #include "memory.h"
 #include "bitmap.h"
+#include "page_frame_allocator.h"
 
 #define KB 1024
 
@@ -120,12 +121,11 @@ void _start(struct stivale2_struct *stivale2_struct) {
     setDefaultFontRenderer(&fontRenderer);
 
     // draw this string onto the screen
-    drawString("Misra OS | Copyright Siddharth Mishra (c) 2022 | MIT License\n\n");
+    drawString("Misra OS | Copyright Siddharth Mishra (c) 2022 | CC BY-SA 3.0\n\n");
 
     // load gdt
-    drawString("[+] Initializing Global Descriptor Table...\n");
+    drawString("[+] Initializing Global Descriptor Table\n");
     initGDT();
-    drawString("[+] Initializing Global Descriptor Table... Complete!\n");
 
     // get the memmap tag given to kernel by the bootloader
     struct stivale2_struct_tag_memmap *memmap_tag;
@@ -141,27 +141,20 @@ void _start(struct stivale2_struct *stivale2_struct) {
         drawString("[+] Got the memory map.\n");
     }
 
-    // print status
-    drawString("[+] Initializing memory allocator...\n");
-    initMemoryManager(memmap_tag);
-    drawString("[+] Initializing memory allocator... Complete\n");
-
-    // create bitmap
-    uint8_t bmpBuf[2] = {0};
-    Bitmap bmp = {2, bmpBuf};
-
     //asm volatile (".byte 0xeb, 0xef");
 
-    for(uint8_t i = 0; i < 8; i++){
-        if(i % 2){
-            bitmapSetBit(&bmp, i, true);
-        }
-    }
+    // create PFA
+    createPageFrameAllocator(memmap_tag->entries, memmap_tag->memmap);
 
-    for(uint8_t i = 0; i < 8; i++){
-        if(bitmapGetBit(&bmp, i)) drawString("true\t");
-        else drawString("false\t");
-    }
+    // print stats
+    printMemoryStats();
+
+    // allocate some memory
+    // allocate 10 pages
+    allocatePages(findFreePage(), 10);
+
+    // print stats again
+    printMemoryStats();
 
     // We're done, just hang...
     for (;;) {

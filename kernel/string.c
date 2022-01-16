@@ -90,3 +90,11 @@ const char* utohexstr(uint64_t n){
 
     return int_to_string_buffer;
 }
+
+// memset
+void memset(void* src, char c, size_t n){
+    uint8_t* u8src = (uint8_t*)src;
+    for(size_t i = 0; i < n; i++){
+        u8src[i] = c;
+    }
+}

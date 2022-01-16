@@ -18,4 +18,8 @@ const char* itostr(int64_t n);
 const char* utostr(uint64_t n);
 const char* utohexstr(uint64_t n);
 
+// memory functions
+// set each byte of src memory to character c for size n
+void memset(void* src, char c, size_t n);
+
 #endif // STRING_H_
