@@ -43,8 +43,6 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
     PrintDebug("[+] Initializing Global Descriptor Table\n");
     InstallGDT();
 
-    InfiniteHalt();
-
     // get the memmap tag given to kernel by the bootloader
     struct stivale2_struct_tag_memmap *memmap_tag;
     memmap_tag = reinterpret_cast<stivale2_struct_tag_memmap*>(StivaleGetTag(tagList, STIVALE2_STRUCT_TAG_MEMMAP_ID));
