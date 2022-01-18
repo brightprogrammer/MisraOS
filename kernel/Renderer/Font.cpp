@@ -6,7 +6,7 @@
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#include "font.h"
+#include "Font.hpp"
 
 // m64gx_8x16 font
 static uint8_t font_bitmap_array[4096] = {
@@ -269,6 +269,6 @@ static uint8_t font_bitmap_array[4096] = {
 };
 
 // return the static array
-uint8_t* getFontBitmapArray(){
-    return font_bitmap_array;
+Bitmap GetFontBitmap(){
+    return Bitmap(sizeof(font_bitmap_array), font_bitmap_array);
 }

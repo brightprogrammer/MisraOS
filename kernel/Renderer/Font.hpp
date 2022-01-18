@@ -10,18 +10,19 @@
 #define FONT_H_
 
 #include <stdint.h>
+#include "../Utils/Bitmap.hpp"
 
 #define FONT_WIDTH 8
 #define FONT_HEIGHT 16
 
 // return the statically defined font array
-uint8_t* getFontBitmapArray();
+Bitmap GetFontBitmap();
 
 // contains basic font related information
-typedef struct {
-    uint8_t *bitmap;
+struct Font{
+    Bitmap bitmap;
     uint8_t font_width;
     uint8_t font_height;
-} Font;
+};
 
 #endif // FONT_H_
