@@ -11,7 +11,6 @@
 #include "Print.hpp"
 #include "String.hpp"
 #include "GDT.hpp"
-#include "Memory.hpp"
 #include "Utils/Bitmap.hpp"
 #include "Bootloader/Util.hpp"
 
@@ -37,9 +36,14 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
     // draw this string onto the screen
     Print("Misra OS | Copyright Siddharth Mishra (c) 2022 | CC BY-SA 3.0\n\n");
 
+    // asm code to jump to same position again and again
+    // asm volatile (".byte 0xeb, 0xef");
+
     // load gdt
-    Print("[+] Initializing Global Descriptor Table\n");
-    initGDT();
+    PrintDebug("[+] Initializing Global Descriptor Table\n");
+    InstallGDT();
+
+    InfiniteHalt();
 
     // get the memmap tag given to kernel by the bootloader
     struct stivale2_struct_tag_memmap *memmap_tag;
@@ -47,16 +51,13 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
 
     // check if tag is valid
     if(memmap_tag == NULL){
-        fontRenderer.foregroundColour = 0xffff0000;
-        Print("[-] Failed to get memory map.");
+        PrintError("[-] Failed to get memory map.");
 
         // hang
         InfiniteHalt();
     }else{
-        Print("[+] Got the memory map.\n");
+        PrintDebug("[+] Got the memory map.\n");
     }
-
-    //asm volatile (".byte 0xeb, 0xef");
 
     // We're done, just InfiniteHalt...
     for (;;) {

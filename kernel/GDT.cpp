@@ -6,15 +6,15 @@
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#include "gdt.h"
+#include "GDT.hpp"
 
 // create default gdt
-static __attribute__((aligned(0x1000))) GDT default_gdt;
+static GDT __attribute__((aligned(0x1000))) default_gdt;
 // pointer to global_descriptor table
 static GDTR gdtr;
 
 // load gdt address in gdtr register
-void loadGDTR(){
+void LoadGDTR(){
     // load gdtr
     asm volatile("lgdt %0"
                  :
@@ -38,7 +38,9 @@ void loadGDTR(){
                  : "a"((uint16_t)0x10)); // offset to data segment
 }
 
-GDTEntry createGDTEntry(uint8_t access, uint8_t attributes){
+// create a new gdt entry using given values
+// in long mode, all fields are ignored, except these two.
+GDTEntry CreateGDTEntry(uint8_t access, uint8_t attributes){
     GDTEntry gdtEntry;
 
     gdtEntry.segment_limit_low = 0;
@@ -53,20 +55,52 @@ GDTEntry createGDTEntry(uint8_t access, uint8_t attributes){
 
 
 // initializes global descriptor table
-void initGDT(){
+void InstallGDT(){
     // prepare pointer to gdt
     // minus 1 to get the last valid byte address in gdt
     gdtr.table_limit = sizeof(GDT) - 1;
     gdtr.table_base_address = (uint64_t)&default_gdt;
 
+    // // fill gdt:
+    // // createGDTEntry(access_flags, attributes/granularity)
+    // // null descriptor has all fields set to 0 (null)
+    // default_gdt.null = CreateGDTEntry(0x00, 0x00);
+    // // if code segment is conforming then code segments that don't have the same dpl
+    // // won't be able to run the conforming code!
+    // // access flags : present-bit = 1, descriptor-privilege-level = 0, conforming-bit = 0
+    // // attributes : d-bit = 0, l-bit = 1
+    // // l-bit decides whether the program is running in 64 bit mode or not
+    // // for now d-bit must always be set to 0 (acc. to amd64 manuals)
+    // default_gdt.kernel_code = CreateGDTEntry(0x90, 0x20);
+    // // access flags : present-bit = 1, rest other fields are ignored
+    // // attributes : ignored
+    // default_gdt.kernel_data = CreateGDTEntry(0xa0, 0x00);
+    // // access flags : present-bit = 1, descriptor-privilege-level = 3, conforming-bit = 0
+    // // attributes : d-bit = 0, l-bit = 1
+    // default_gdt.user_code = CreateGDTEntry(0xf8, 0x20);
+    // // same as kernel's data segment descriptor
+    // default_gdt.user_data = CreateGDTEntry(0xa0, 0x00);
+
     // fill gdt:
     // createGDTEntry(access_flags, attributes/granularity)
-    default_gdt.null = createGDTEntry(0x00, 0x00);
-    default_gdt.kernel_code = createGDTEntry(0x9a, 0x20);
-    default_gdt.kernel_data = createGDTEntry(0x92, 0x00);
-    default_gdt.user_code = createGDTEntry(0xfa, 0x20);
-    default_gdt.user_data = createGDTEntry(0xf2, 0x00);
+    // null descriptor has all fields set to 0 (null)
+    default_gdt.null = CreateGDTEntry(0x00, 0x00);
+    // if code segment is conforming then code segments that don't have the same dpl
+    // won't be able to run the conforming code!
+    // access flags : present-bit = 1, descriptor-privilege-level = 0, conforming-bit = 0
+    // attributes : d-bit = 0, l-bit = 1
+    // l-bit decides whether the program is running in 64 bit mode or not
+    // for now d-bit must always be set to 0 (acc. to amd64 manuals)
+    default_gdt.kernel_code = CreateGDTEntry(0x9a, 0x20);
+    // access flags : present-bit = 1, rest other fields are ignored
+    // attributes : ignored
+    default_gdt.kernel_data = CreateGDTEntry(0x90, 0x00);
+    // access flags : present-bit = 1, descriptor-privilege-level = 3, conforming-bit = 0
+    // attributes : d-bit = 0, l-bit = 1
+    default_gdt.user_code = CreateGDTEntry(0xfa, 0x20);
+    // same as kernel's data segment descriptor
+    default_gdt.user_data = CreateGDTEntry(0x90, 0x00);
 
     // reload gdt address in gdtr
-    loadGDTR();
+    LoadGDTR();
 }

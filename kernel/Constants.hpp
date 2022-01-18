@@ -11,4 +11,4 @@
 #define MB 1024*KB
 #define GB 1024*MB
 
-#endif // CONSTANTS_H_
+#endif // CONSTANTS_HPP

@@ -6,8 +6,8 @@
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#ifndef PAGING_H_
-#define PAGING_H_
+#ifndef PAGING_HPP
+#define PAGING_HPP
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -18,4 +18,4 @@ typedef struct {
 
 } PageDirectoryEntry;
 
-#endif // PAGING_H_
+#endif // PAGING_HPP

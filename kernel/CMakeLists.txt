@@ -3,8 +3,8 @@
 
 
 # set sources
-set(KERNEL_SRCS "kernel.c" "renderer.c" "font.c" "string.c"
-                "gdt.c" "bitmap.c" "memory.c" "page_frame_allocator.c")
+set(KERNEL_SRCS "KernelEntry.cpp" "Renderer/Framebuffer.cpp" "Renderer/FontRenderer.cpp" "Renderer/Font.cpp" "String.cpp"
+                "GDT.cpp" "Utils/Bitmap.cpp" "Bootloader/Util.cpp" "Print.cpp")
 
 # make kernel as executable
 add_executable(kernel ${KERNEL_SRCS})

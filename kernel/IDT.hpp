@@ -5,8 +5,8 @@
  *@brief interrupt descriptor table
  **/
 
-#ifndef IDT_H_
-#define IDT_H_
+#ifndef IDT_HPP
+#define IDT_HPP
 
 #include <stdint.h>
 
@@ -39,4 +39,4 @@ typedef struct {
 // you know what this does!
 void initialize_interrupt_descriptor_table();
 
-#endif // IDT_H_
+#endif // IDT_HPP

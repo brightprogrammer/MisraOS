@@ -1,13 +1,13 @@
 /**
- *@file string.h
+ *@file String.hpp
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/10/22
  *@brief Provide basic string utilities to kernel
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#ifndef STRING_H_
-#define STRING_H_
+#ifndef STRING_HPP
+#define STRING_HPP
 
 #include <stddef.h>
 #include <stdint.h>
@@ -22,4 +22,4 @@ const char* utohexstr(uint64_t n);
 // set each byte of src memory to character c for size n
 void memset(void* src, char c, size_t n);
 
-#endif // STRING_H_
+#endif // STRING_HPP

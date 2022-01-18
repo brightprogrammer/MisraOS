@@ -7,7 +7,7 @@
  **/
 
 #include "FontRenderer.hpp"
-#include "string.h"
+#include "../String.hpp"
 
 // default font renderer
 FontRenderer *defaultFontRenderer;

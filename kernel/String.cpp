@@ -1,4 +1,4 @@
-#/**
+/**
  *@file string.c
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/10/22
@@ -6,7 +6,7 @@
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#include "string.h"
+#include "String.hpp"
 
 char int_to_string_buffer[128];
 

@@ -6,8 +6,8 @@
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#ifndef RENDERER_H_
-#define RENDERER_H_
+#ifndef RENDERER_HPP
+#define RENDERER_HPP
 
 #include <stdint.h>
 #include "Framebuffer.hpp"
@@ -51,4 +51,4 @@ void SetDefaultFontRenderer(FontRenderer& fontRenderer);
 // getter for default font renderer
 FontRenderer* GetDefaultFontRenderer();
 
-#endif // RENDERER_H_
+#endif // RENDERER_HPP

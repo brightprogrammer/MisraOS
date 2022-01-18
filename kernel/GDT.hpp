@@ -6,19 +6,19 @@
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#ifndef GDT_H_
-#define GDT_H_
+#ifndef GDT_HPP
+#define GDT_HPP
 
 #include <stdint.h>
 
 // struct to represent gdtr
-typedef struct{
+struct GDTR{
     uint16_t table_limit;
     uint64_t table_base_address;
-} __attribute__((packed)) GDTR;
+} __attribute__((packed));
 
 // implementation of a general segment descriptor
-typedef struct {
+struct GDTEntry {
     // segment limit is divided into 2 parts
     // fist part is bit 0 to 15 in first dword
     // second pat is bit 16 to 19 in second dword
@@ -46,17 +46,17 @@ typedef struct {
 
     // finally the higher part of base_address
     uint8_t base_address_high;
-} __attribute__((packed)) GDTEntry;
+} __attribute__((packed));
 
-typedef struct {
+struct GDT{
     GDTEntry null;
     GDTEntry kernel_code;
     GDTEntry kernel_data;
     GDTEntry user_code;
     GDTEntry user_data;
-} __attribute__((packed)) __attribute__((aligned(0x1000))) GDT;
+} __attribute__((packed)) __attribute__((aligned(0x1000)));
 
-// initialize global descriptor table
-void initGDT();
+// install kernel's global descriptor table in gdtr
+void InstallGDT();
 
-#endif // GDT_H_
+#endif // GDT_HPP

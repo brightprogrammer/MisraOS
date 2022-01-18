@@ -6,8 +6,8 @@
  *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
  **/
 
-#ifndef FONT_H_
-#define FONT_H_
+#ifndef FONT_HPP
+#define FONT_HPP
 
 #include <stdint.h>
 #include "../Utils/Bitmap.hpp"
@@ -25,4 +25,4 @@ struct Font{
     uint8_t font_height;
 };
 
-#endif // FONT_H_
+#endif // FONT_HPP
