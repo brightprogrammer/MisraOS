@@ -1,3 +1,12 @@
+/**
+ *@file MemoryManager.hpp
+ *@author Siddharth Mishra (brightprogrammer)
+ *@date 01/19/2022
+ *@brief Memory Manager
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
+ **/
+
+
 #ifndef MEMORY_HPP
 #define MEMORY_HPP
 
