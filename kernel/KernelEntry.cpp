@@ -13,6 +13,7 @@
 #include "GDT.hpp"
 #include "Utils/Bitmap.hpp"
 #include "Bootloader/Util.hpp"
+#include "MemoryManager.hpp"
 
 // The following will be our kernel's entry point.
 extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
@@ -40,7 +41,7 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
     // asm volatile (".byte 0xeb, 0xef");
 
     // load gdt
-    PrintDebug("[+] Initializing Global Descriptor Table\n");
+    PrintDebug("Initializing Global Descriptor Table\n");
     InstallGDT();
 
     // get the memmap tag given to kernel by the bootloader
@@ -49,13 +50,37 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
 
     // check if tag is valid
     if(memmap_tag == NULL){
-        PrintError("[-] Failed to get memory map.");
+        PrintError("Failed to get memory map.");
 
         // hang
         InfiniteHalt();
     }else{
-        PrintDebug("[+] Got the memory map.\n");
+        PrintDebug("Got the memory map.\n");
     }
+
+    MemoryManager allocator(memmap_tag->entries, memmap_tag->memmap);
+    allocator.ShowStatistics();
+
+    // allocate a page
+    uint64_t* page = reinterpret_cast<uint64_t*>(allocator.AllocatePage());
+
+    // fill some random things here
+    for(size_t i = 0; i < 100; i++){
+        page[i] = i*i;
+    }
+
+    // print this array
+    for(size_t  i = 0; i < 100; i++){
+        Print(utostr(page[i])); Print(" ");
+    }
+    Print("\n");
+
+    // print stats again and then free the page
+    allocator.ShowStatistics();
+    allocator.FreePage(reinterpret_cast<uint64_t>(page));
+    Print("Check statistics after freeing page\n");
+    allocator.ShowStatistics();
+
 
     // We're done, just InfiniteHalt...
     for (;;) {

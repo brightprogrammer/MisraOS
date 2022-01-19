@@ -70,10 +70,10 @@ void InstallGDT(){
     // createGDTEntry(access_flags, attributes/granularity)
     // null descriptor has all fields set to 0 (null)
     default_gdt.null = CreateGDTEntry(0x00, 0x00);
-    default_gdt.kernel_code = CreateGDTEntry(0x9a, 0x20);
+    default_gdt.kernel_code = CreateGDTEntry(0x9b, 0x20);
     default_gdt.kernel_data = CreateGDTEntry(0x92, 0x00);
-    default_gdt.user_code = CreateGDTEntry(0xfa, 0x20);
-    default_gdt.user_data = CreateGDTEntry(0x92, 0x00);
+    default_gdt.user_code = CreateGDTEntry(0xfb, 0x20);
+    default_gdt.user_data = CreateGDTEntry(0xf2, 0x00);
 
     // reload gdt address in gdtr
     LoadGDTR();
