@@ -78,7 +78,7 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
     // map the framebuffer to itself
     uint64_t fbBase = reinterpret_cast<uint64_t>(framebuffer.address);
     uint64_t fbSize = static_cast<uint64_t>(framebuffer.width) * static_cast<uint64_t>(framebuffer.height) + PAGE_SIZE;
-     for(uint64_t i = fbBase; i < fbSize; i += PAGE_SIZE){
+    for(uint64_t i = fbBase; i < fbSize; i += PAGE_SIZE){
         virtualMemoryManager.MapMemory(i, i);
     }
 
