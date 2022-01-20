@@ -13,7 +13,8 @@
 #include "GDT.hpp"
 #include "Utils/Bitmap.hpp"
 #include "Bootloader/Util.hpp"
-#include "MemoryManager.hpp"
+#include "PhysicalMemoryManager.hpp"
+#include "VirtualMemoryManager.hpp"
 
 // The following will be our kernel's entry point.
 extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
@@ -28,7 +29,6 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
 
     // get framebuffer details
     Framebuffer framebuffer(framebuffer_tag);
-
     // prepare renderer
     FontRenderer fontRenderer(framebuffer);
     // set default font renderer
@@ -58,29 +58,39 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
         PrintDebug("Got the memory map.\n");
     }
 
-    MemoryManager allocator(memmap_tag->entries, memmap_tag->memmap);
-    allocator.ShowStatistics();
+    // NOTE : Initialize memory manager only once
+    PhysicalMemoryManager physicalMemoryManager(memmap_tag->entries, memmap_tag->memmap);
+    physicalMemoryManager.ShowStatistics();
 
-    // allocate a page
-    uint64_t* page = reinterpret_cast<uint64_t*>(allocator.AllocatePage());
+    // create page map table
+    PageTable* pageMapTable = reinterpret_cast<PageTable*>(physicalMemoryManager.AllocatePage());
+    memset(reinterpret_cast<void*>(pageMapTable), 0, PAGE_SIZE);
 
-    // fill some random things here
-    for(size_t i = 0; i < 100; i++){
-        page[i] = i*i;
+    // // create vmm
+     VirtualMemoryManager virtualMemoryManager(pageMapTable);
+
+    // create identity map
+    // i.e each physical address is mapped to itself
+    for(uint64_t t = 0; t < physicalMemoryManager.GetTotalMemory(); t += PAGE_SIZE){
+        virtualMemoryManager.MapMemory(t, t);
     }
 
-    // print this array
-    for(size_t  i = 0; i < 100; i++){
-        Print(utostr(page[i])); Print(" ");
+    // map the framebuffer to itself
+    uint64_t fbBase = reinterpret_cast<uint64_t>(framebuffer.address);
+    uint64_t fbSize = static_cast<uint64_t>(framebuffer.width) * static_cast<uint64_t>(framebuffer.height) + PAGE_SIZE;
+     for(uint64_t i = fbBase; i < fbSize; i += PAGE_SIZE){
+        virtualMemoryManager.MapMemory(i, i);
     }
-    Print("\n");
 
-    // print stats again and then free the page
-    allocator.ShowStatistics();
-    allocator.FreePage(reinterpret_cast<uint64_t>(page));
-    Print("Check statistics after freeing page\n");
-    allocator.ShowStatistics();
+    physicalMemoryManager.ShowStatistics();
+    //InfiniteHalt();
 
+    // load the page map table in cr3 register
+    asm volatile("mov %0, %%cr3"
+                 :
+                 : "r" (pageMapTable));
+
+    PrintDebug("Virtual Memory Manager is up and running!");
 
     // We're done, just InfiniteHalt...
     for (;;) {

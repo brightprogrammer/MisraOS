@@ -90,12 +90,14 @@ PhysicalMemoryManager::PhysicalMemoryManager(uint64_t numEntries, stivale2_mmap_
 
     // Finally find available pages in largest memory block.
     uint64_t startAddress = largestMemBlock.base + numPagesUsedByStack * PAGE_SIZE;
-    uint64_t maxAvailablePages =  (largestMemBlock.size - numPagesUsedByStack*PAGE_SIZE) / PAGE_SIZE;
+    uint64_t maxAvailablePages =  (largestMemBlock.size - (numPagesUsedByStack * PAGE_SIZE)) / PAGE_SIZE;
+    uint64_t j = 0;
     for(size_t i = currentStackSize; i < maxAvailablePages; i++){
         // check if page's limit is less than memory block's limit
-        if(startAddress + (i + 1) * PAGE_SIZE < largestMemBlock.GetLimit()){
-            pageStack[i] = startAddress + i * PAGE_SIZE;
+        if((startAddress + (j + 1) * PAGE_SIZE) <= largestMemBlock.GetLimit()){
+            pageStack[i] = startAddress + (j * PAGE_SIZE);
             currentStackSize++;
+            j++;
         }
     }
 }
@@ -117,7 +119,7 @@ uint64_t PhysicalMemoryManager::AllocatePage(){
     usedMemory += PAGE_SIZE;
 
     currentStackSize--;
-    return pageStack[currentStackSize - 1];
+    return pageStack[currentStackSize];
 }
 
 // allocate more than one pages at a time
