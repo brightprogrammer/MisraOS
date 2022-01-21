@@ -1,6 +1,7 @@
 #include "VirtualMemoryManager.hpp"
 #include "PhysicalMemoryManager.hpp"
 #include "String.hpp"
+#include "Print.hpp"
 
 // A page map level 4 (PML4) contains 512 page directory pointer tables (PDP Tables)
 // A PDP table is an array of 512 page ditectories (PDs)
@@ -24,8 +25,36 @@
 // is a page table entry that stores address of lower level's page table
 
 
-VirtualMemoryManager::VirtualMemoryManager(PageTable* pageMapLevel4):
-pageMapLevel4(pageMapLevel4){}
+VirtualMemoryManager::VirtualMemoryManager(PageTable* pageMapTable){
+    pml4 = pageMapTable;
+}
+
+// get next level of paging
+PageTable* VirtualMemoryManager::GetNextLevel(PageTable* pageTable, uint64_t entryIndex, bool allocate){
+    PageDirectoryEntry* pageDirectoryEntry = &pageTable->entries[entryIndex];
+    PageTable* pageDirectoryPointer = nullptr;
+
+    // if page directory entry is not present and allocation is allowed, then allocate it
+    if(!pageDirectoryEntry->present){
+        // if allocation isn't allowed then return nullptr
+        if(!allocate){
+            return nullptr;
+        }
+
+        // create page directory pointer
+        pageDirectoryPointer = reinterpret_cast<PageTable*>(pmm.AllocatePage());
+        memset(reinterpret_cast<void*>(pageDirectoryPointer), 0, PAGE_SIZE);
+
+        // shift by 12 bits to align it to 0x1000 boundary
+        pageDirectoryEntry->address = reinterpret_cast<uint64_t>(pageDirectoryPointer) >> 12;
+        pageDirectoryEntry->present = true;
+        pageDirectoryEntry->readWrite = true;
+    }else{
+        pageDirectoryPointer = reinterpret_cast<PageTable*>(pageDirectoryEntry->address << 12);
+    }
+
+    return pageDirectoryPointer;
+}
 
 void VirtualMemoryManager::MapMemory(uint64_t virtualAddress, uint64_t physicalAddress){
     uint64_t vaddr = virtualAddress;
@@ -35,76 +64,44 @@ void VirtualMemoryManager::MapMemory(uint64_t virtualAddress, uint64_t physicalA
 
     // find table index
     vaddr >>= 9;
-    uint64_t pageTableIndex = vaddr & 0x1ff;
+    uint64_t pml1Index = vaddr & 0x1ff;
 
     // find page directory index
     vaddr >>= 9;
-    uint64_t pageDirectoryIndex = vaddr & 0x1ff;
+    uint64_t pml2Index = vaddr & 0x1ff;
 
     // find page directory pointer index
     // this index is used in page map level 4 array to point to a page directory
     vaddr >>= 9;
-    uint64_t pageDirectoryPointerIndex = vaddr & 0x1ff;
-
-    // don't need to initialize physicalAllocat for again and again
-    // we only need an instance here
-    static PhysicalMemoryManager physicalAllocator = {};
+    uint64_t pml3Index = vaddr & 0x1ff;
 
     // get page directory pointer from PML4
-    PageDirectoryEntry pageDirectoryEntry = pageMapLevel4->entries[pageDirectoryPointerIndex];
-    PageTable* pageDirectoryPointer;
-    if(!pageDirectoryEntry.present){
-        // create page directory pointer
-        pageDirectoryPointer = reinterpret_cast<PageTable*>(physicalAllocator.AllocatePage());
-        memset(reinterpret_cast<void*>(pageDirectoryPointer), 0, PAGE_SIZE);
-
-        // shift by 12 bits to align it to 0x1000 boundary
-        pageDirectoryEntry.address = reinterpret_cast<uint64_t>(pageDirectoryPointer) >> 12;
-        pageDirectoryEntry.present = true;
-        pageDirectoryEntry.readWrite = true;
-        pageMapLevel4->entries[pageDirectoryPointerIndex] = pageDirectoryEntry;
-    }else{
-        pageDirectoryPointer = reinterpret_cast<PageTable*>(reinterpret_cast<uint64_t>(pageDirectoryEntry.address) << 12);
+    PageTable* pml3 = GetNextLevel(pml4, pml3Index, true);
+    if(pml3 == nullptr){
+        PrintError("Failed to get PML3\n");
     }
 
-    // get page directory from page directory entry
-    pageDirectoryEntry = pageDirectoryPointer->entries[pageDirectoryIndex];
-    PageTable* pageDirectory;
-    if(!pageDirectoryEntry.present){
-        // create page directory
-        pageDirectory = reinterpret_cast<PageTable*>(physicalAllocator.AllocatePage());
-        memset(reinterpret_cast<void*>(pageDirectory), 0, PAGE_SIZE);
-
-        // shift by 12 bits to align it to 0x1000 boundary
-        pageDirectoryEntry.address = reinterpret_cast<uint64_t>(pageDirectory) >> 12;
-        pageDirectoryEntry.present = true;
-        pageDirectoryEntry.readWrite = true;
-        pageDirectoryPointer->entries[pageDirectoryIndex] = pageDirectoryEntry;
-    }else{
-        pageDirectory = reinterpret_cast<PageTable*>(reinterpret_cast<uint64_t>(pageDirectoryEntry.address) << 12);
+    // get page directory from page directory pointer
+    PageTable* pml2 = GetNextLevel(pml3, pml2Index, true);
+    if(pml2 == nullptr){
+        PrintError("Failed to get PML2\n");
     }
+
 
     // get page table from page directory
-    pageDirectoryEntry = pageDirectory->entries[pageTableIndex];
-    PageTable* pageTable;
-    if(!pageDirectoryEntry.present){
-        // create page table
-        pageTable = reinterpret_cast<PageTable*>(physicalAllocator.AllocatePage());
-        memset(reinterpret_cast<void*>(pageTable), 0, PAGE_SIZE);
-
-        // shift by 12 bits to align it to 0x1000 boundary
-        pageDirectoryEntry.address = reinterpret_cast<uint64_t>(pageTable) >> 12;
-        pageDirectoryEntry.present = true;
-        pageDirectoryEntry.readWrite = true;
-        pageDirectory->entries[pageTableIndex] = pageDirectoryEntry;
-    }else{
-        pageTable = reinterpret_cast<PageTable*>(reinterpret_cast<uint64_t>(pageDirectoryEntry.address) << 12);
+    PageTable* pml1 = GetNextLevel(pml2, pml1Index, true);
+    if(pml1 == nullptr){
+        PrintError("Failed to get PML1\n");
     }
 
+
     // get page from page table
-    pageDirectoryEntry = pageTable->entries[pageIndex];
-    pageDirectoryEntry.address = physicalAddress >> 12;
-    pageDirectoryEntry.present = true;
-    pageDirectoryEntry.readWrite = true;
-    pageTable->entries[pageIndex] = pageDirectoryEntry;
+    PageDirectoryEntry *pde = &pml1->entries[pageIndex];
+    if(pde == nullptr){
+        PrintError("Failed to get Page\n");
+    }
+
+    pde->address = (physicalAddress >> 12);
+    pde->present = true;
+    pde->readWrite = true;
 }

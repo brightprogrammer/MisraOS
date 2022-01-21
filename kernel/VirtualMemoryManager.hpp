@@ -2,6 +2,7 @@
 #define VIRTUALMEMORYMANAGER_HPP
 
 #include <cstdint>
+#include "PhysicalMemoryManager.hpp"
 
 // page and page directory pointer use the same structure
 struct PageDirectoryEntry {
@@ -36,11 +37,19 @@ struct PageTable {
 } __attribute__((aligned(0x1000)));
 
 
+// vmm implementation
 struct VirtualMemoryManager{
+    // create virtual memory manager
     VirtualMemoryManager(PageTable* PML4Address);
+
+    // map physical address to given virtual address
     void MapMemory(uint64_t virtualAddress, uint64_t physicalAddress);
 private:
-    PageTable* pageMapLevel4;
+    // get's the next level in page table tree
+    PageTable* GetNextLevel(PageTable* pageTable, uint64_t entryIndex, bool allocate);
+
+    static inline PhysicalMemoryManager pmm = {};
+    PageTable* pml4;
 };
 
 #endif // VIRTUALMEMORYMANAGER_HPP

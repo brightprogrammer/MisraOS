@@ -58,7 +58,7 @@ PhysicalMemoryManager::PhysicalMemoryManager(uint64_t numEntries, stivale2_mmap_
     if(largestMemBlock.size <= numPagesUsedByStack * PAGE_SIZE){
         PrintError("Insufficient memory to initialize PhysicalMemoryManager\n");
         PrintDebug("\tLargest memory block size : "); PrintDebug(utostr(largestMemBlock.size / KB)); PrintDebug(" KB\n");
-        PrintDebug("\tMemory required : "); PrintDebug(utostr(numPagesUsedByStack * 4)); PrintDebug(" KB\n");
+        PrintDebug("\tMemory required : "); PrintDebug(utostr(numPagesUsedByStack * PAGE_SIZE / KB)); PrintDebug(" KB\n");
         InfiniteHalt();
     }
 
@@ -72,6 +72,12 @@ PhysicalMemoryManager::PhysicalMemoryManager(uint64_t numEntries, stivale2_mmap_
     freeMemory -= numPagesUsedByStack * PAGE_SIZE;
     usedMemory += numPagesUsedByStack * PAGE_SIZE;
 
+    PrintDebug("PageStack Range : 0x");
+    PrintDebug(utohexstr(largestMemBlock.base));
+    PrintDebug(" - 0x");
+    PrintDebug(utohexstr(largestMemBlock.base + numPagesUsedByStack * PAGE_SIZE));
+    PrintDebug("\n");
+
     // Find usable page frames in small blocks first.
     // If these pages are at the bottom of the stack then
     // there is less chance of them being allocated.
@@ -80,10 +86,23 @@ PhysicalMemoryManager::PhysicalMemoryManager(uint64_t numEntries, stivale2_mmap_
         if((mmapEntries[i].type == STIVALE2_MMAP_USABLE) && // memory is usable
            (mmapEntries[i].base != largestMemBlock.base) && // not the lagest block
            (mmapEntries[i].length >= PAGE_SIZE)){ // has atleast 1 page
+
+            PrintDebug("Getting Pages : 0x");
+            PrintDebug(utohexstr(mmapEntries[i].base));
+            PrintDebug(" - 0x");
+            PrintDebug(utohexstr(mmapEntries[i].base + mmapEntries[i].length));
+            PrintDebug(" [ ");
+            PrintDebug(utostr(mmapEntries[i].length / PAGE_SIZE));
+            PrintDebug(" PAGES ]\n");
+
             // start getting pages
-            for(size_t i = currentStackSize; i < mmapEntries[i].length / PAGE_SIZE; i++){
-                pageStack[i] = mmapEntries[i].base + i*PAGE_SIZE;
-                currentStackSize++;
+            uint64_t numPages = mmapEntries[i].length / PAGE_SIZE;
+            for(size_t j = 0; j < numPages ; j++){
+                // if this page's limit is less than this block's limit then add it
+                if((mmapEntries[i].base + (j + 1) * PAGE_SIZE) <= mmapEntries[i].base + mmapEntries[i].length){
+                    pageStack[currentStackSize] = mmapEntries[i].base + (j * PAGE_SIZE);
+                    currentStackSize++;
+                }
             }
         }
     }
@@ -91,13 +110,20 @@ PhysicalMemoryManager::PhysicalMemoryManager(uint64_t numEntries, stivale2_mmap_
     // Finally find available pages in largest memory block.
     uint64_t startAddress = largestMemBlock.base + numPagesUsedByStack * PAGE_SIZE;
     uint64_t maxAvailablePages =  (largestMemBlock.size - (numPagesUsedByStack * PAGE_SIZE)) / PAGE_SIZE;
-    uint64_t j = 0;
-    for(size_t i = currentStackSize; i < maxAvailablePages; i++){
+
+    PrintDebug("Getting Pages : 0x");
+    PrintDebug(utohexstr(startAddress));
+    PrintDebug(" - 0x");
+    PrintDebug(utohexstr(startAddress + maxAvailablePages * PAGE_SIZE));
+    PrintDebug(" [ ");
+    PrintDebug(utostr(maxAvailablePages));
+    PrintDebug(" PAGES ]\n");
+
+    for(size_t i = 0; i < maxAvailablePages; i++){
         // check if page's limit is less than memory block's limit
-        if((startAddress + (j + 1) * PAGE_SIZE) <= largestMemBlock.GetLimit()){
-            pageStack[i] = startAddress + (j * PAGE_SIZE);
+        if((startAddress + (i + 1) * PAGE_SIZE) <= largestMemBlock.GetLimit()){
+            pageStack[currentStackSize] = startAddress + (i * PAGE_SIZE);
             currentStackSize++;
-            j++;
         }
     }
 }

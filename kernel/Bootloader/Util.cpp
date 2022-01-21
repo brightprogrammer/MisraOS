@@ -4,7 +4,8 @@
 // we cannot dynamically allocate anything now
 // so will initialize stack as an array in .bss and tell stivale
 // where our stack is
-static uint8_t stack[16*KB];
+#define STACK_SIZE (32*KB)
+static uint8_t stack[STACK_SIZE];
 
 // we need a framebuffer from stivale on bootup so we
 // need to tell stivale that we need a framebuffer instead of
@@ -35,7 +36,7 @@ static struct stivale2_header stivale_hdr = {
     // Let's tell the bootloader where our stack is.
     // We need to add the sizeof(stack) since in x86(_64) the stack grows
     // downwards.
-    .stack = (uintptr_t)stack + sizeof(stack),
+    .stack = (uintptr_t)stack + STACK_SIZE,
     // Bit 1, if set, causes the bootloader to return to us pointers in the
     // higher half, which we likely want since this is a higher half kernel.
     // Bit 2, if set, tells the bootloader to enable protected memory ranges,
@@ -47,6 +48,7 @@ static struct stivale2_header stivale_hdr = {
     // to load it.
     // Bit 4 disables a deprecated feature and should always be set.
     .flags = (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4),
+
     // This header structure is the root of the linked list of header tags and
     // points to the first one in the linked list.
     .tags = (uintptr_t)&framebuffer_hdr_tag

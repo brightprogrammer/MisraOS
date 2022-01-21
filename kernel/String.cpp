@@ -8,7 +8,7 @@
 
 #include "String.hpp"
 
-char int_to_string_buffer[128];
+static char int_to_string_buffer[128];
 
 // get length of string
 size_t strlen(const char* str){

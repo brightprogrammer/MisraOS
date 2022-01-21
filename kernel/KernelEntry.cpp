@@ -37,6 +37,10 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
     // draw this string onto the screen
     Print("Misra OS | Copyright Siddharth Mishra (c) 2022 | CC BY-SA 3.0\n\n");
 
+    PrintWarning(utohexstr(reinterpret_cast<uint64_t>(tagList)));
+    Print("\n");
+
+
     // asm code to jump to same position again and again
     // asm volatile (".byte 0xeb, 0xef");
 
@@ -58,31 +62,79 @@ extern "C" [[noreturn]] void KernelEntry(struct stivale2_struct *tagList) {
         PrintDebug("Got the memory map.\n");
     }
 
+    for(size_t i = 0; i < memmap_tag->entries; i++){
+        if(memmap_tag->memmap[i].type == STIVALE2_MMAP_USABLE)
+            PrintDebug("USABLE MEMORY RANGE : 0x");
+        else PrintDebug("UNUSABLE MEMORY RANGE : 0x");
+
+        PrintDebug(utohexstr(memmap_tag->memmap[i].base));
+        PrintDebug(" - 0x");
+        PrintDebug(utohexstr(memmap_tag->memmap[i].base + memmap_tag->memmap[i].length));
+        PrintDebug("\n");
+    }
+
     // NOTE : Initialize memory manager only once
-    PhysicalMemoryManager physicalMemoryManager(memmap_tag->entries, memmap_tag->memmap);
-    physicalMemoryManager.ShowStatistics();
+    PhysicalMemoryManager pmm(memmap_tag->entries, memmap_tag->memmap);
+    pmm.ShowStatistics();
 
     // create page map table
-    PageTable* pageMapTable = reinterpret_cast<PageTable*>(physicalMemoryManager.AllocatePage());
+    PageTable* pageMapTable = reinterpret_cast<PageTable*>(pmm.AllocatePage());
     memset(reinterpret_cast<void*>(pageMapTable), 0, PAGE_SIZE);
 
-    // // create vmm
-     VirtualMemoryManager virtualMemoryManager(pageMapTable);
+    // create vmm
+    VirtualMemoryManager vmm(pageMapTable);
 
     // create identity map
-    // i.e each physical address is mapped to itself
-    for(uint64_t t = 0; t < physicalMemoryManager.GetTotalMemory(); t += PAGE_SIZE){
-        virtualMemoryManager.MapMemory(t, t);
+    for(size_t i = 0; i < pmm.GetTotalMemory(); i += PAGE_SIZE){
+        vmm.MapMemory(i, i);
+    }
+
+    // get kernel address
+    stivale2_struct_tag_kernel_base_address* kaddr_tag = reinterpret_cast<stivale2_struct_tag_kernel_base_address*>(StivaleGetTag(tagList, STIVALE2_STRUCT_TAG_KERNEL_BASE_ADDRESS_ID));
+    uint64_t kernelPhyBase = kaddr_tag->physical_base_address;
+    uint64_t kernelVirtBase = kaddr_tag->virtual_base_address;
+
+    PrintWarning(utohexstr(reinterpret_cast<uint64_t>(tagList)));
+    Print("\n");
+
+    PrintDebug("Got kernel base address : Virtual = 0x"); PrintDebug(utohexstr(kaddr_tag->virtual_base_address));
+    PrintDebug(" Physical = 0x"); PrintDebug(utohexstr(kaddr_tag->physical_base_address)); Print("\n");
+
+    stivale2_struct_tag_pmrs* pmrs_tag = reinterpret_cast<stivale2_struct_tag_pmrs*>(StivaleGetTag(tagList, STIVALE2_STRUCT_TAG_PMRS_ID));
+    stivale2_pmr* pmrs = pmrs_tag->pmrs;
+    uint64_t numPmrs = pmrs_tag->entries;
+
+    PrintDebug("Found "); PrintDebug(utostr(numPmrs)); PrintDebug(" PMR entries\n");
+    for(size_t i = 0; i < numPmrs; i++){
+        PrintDebug("PMR : Base = 0x");
+        PrintDebug(utohexstr(pmrs[i].base));
+        PrintDebug(" Length = ");
+        PrintDebug(utostr(pmrs[i].length / KB));
+        PrintDebug(" KB\n");
+    }
+
+    // map kernel acc to pmrs
+    for(uint64_t i = 0; i < numPmrs; i++){
+        uint64_t virtAddr = pmrs[i].base;
+        uint64_t phyAddr = kernelPhyBase  + (virtAddr - kernelVirtBase);
+        uint64_t length = pmrs[i].length;
+
+        PrintDebug("VMM : Mapping 0x"); PrintDebug(utohexstr(phyAddr)); PrintDebug(" to 0x"); PrintDebug(utohexstr(virtAddr));
+        PrintDebug(" and length : "); PrintDebug(utostr(length / KB)); PrintDebug(" KB\n");
+
+        for(uint64_t j = 0; j < length; j+= PAGE_SIZE){
+            vmm.MapMemory(virtAddr + j, phyAddr + j);
+        }
     }
 
     // map the framebuffer to itself
     uint64_t fbBase = reinterpret_cast<uint64_t>(framebuffer.address);
-    uint64_t fbSize = static_cast<uint64_t>(framebuffer.width) * static_cast<uint64_t>(framebuffer.height) + PAGE_SIZE;
+    uint64_t fbSize = framebuffer.pitch * framebuffer.height + PAGE_SIZE;
     for(uint64_t i = fbBase; i < fbSize; i += PAGE_SIZE){
-        virtualMemoryManager.MapMemory(i, i);
+        vmm.MapMemory(i, i);
     }
 
-    physicalMemoryManager.ShowStatistics();
+    pmm.ShowStatistics();
     //InfiniteHalt();
 
     // load the page map table in cr3 register

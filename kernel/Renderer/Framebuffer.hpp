@@ -17,8 +17,9 @@ struct Framebuffer{
     uint32_t *address;
 
     // width and height of framebuffer
-    uint32_t width;
-    uint32_t height;
+    uint64_t width;
+    uint64_t height;
+    uint64_t pitch;
 };
 
 #endif // FRAMEBUFFER_HPP

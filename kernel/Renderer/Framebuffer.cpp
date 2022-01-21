@@ -5,6 +5,7 @@ Framebuffer::Framebuffer(stivale2_struct_tag_framebuffer* framebuffer_tag){
     address = (uint32_t*)framebuffer_tag->framebuffer_addr;
     width = framebuffer_tag->framebuffer_width;
     height = framebuffer_tag->framebuffer_height;
+    pitch = framebuffer_tag->framebuffer_pitch;
 }
 
 // define operator

@@ -26,7 +26,7 @@
 // 2 - Buddy Allocator
 // 3 - Slab Allocator (claimed to be the best)
 
-#define PAGE_SIZE (4*KB)
+#define PAGE_SIZE uint64_t(4*KB)
 
 // manages page allocation
 struct PhysicalMemoryManager{
