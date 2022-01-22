@@ -12,7 +12,7 @@
 
 #include <cstdint>
 #include <cstddef>
-#include "Bootloader/stivale2.h"
+#include "Bootloader/BootInfo.hpp"
 #include "Constants.hpp"
 
 // Stack based page frame allocator :
@@ -30,11 +30,8 @@
 
 // manages page allocation
 struct PhysicalMemoryManager{
-    // default constructor
-    PhysicalMemoryManager() = default;
-
     // create new memory manager
-    PhysicalMemoryManager(uint64_t numEntries, stivale2_mmap_entry* mmapEntries);
+    PhysicalMemoryManager();
 
     // print memory statistics
     void ShowStatistics();
@@ -81,7 +78,7 @@ private:
 
     // keep the memory map to check that we don't accidentially deallocate a reserved block
     static inline uint64_t numMemmapEntries = 0;
-    static inline stivale2_mmap_entry* memmapEntries = nullptr;
+    static inline MemMapEntry* memmapEntries = nullptr;
 };
 
 #endif // PHYSICALMEMORYMANAGER_HPP

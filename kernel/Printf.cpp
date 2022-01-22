@@ -20,9 +20,20 @@ __attribute__((format(printf, 1, 2))) int Printf(const char* fmtstr, ...){
     va_list vl;
     int i = 0, finalstrsz = 0;
     va_start(vl, fmtstr);
+
+    bool longEnable = false;
+
     while(fmtstr && fmtstr[i]){
+        // check if any format is present
         if(fmtstr[i] == '%'){
             i++;
+
+            // check for long mode print
+            if(fmtstr[i] == 'l'){
+                longEnable = true;
+                i++;
+            }
+
             switch(fmtstr[i]){
             // print character
             case 'c': {
@@ -32,15 +43,44 @@ __attribute__((format(printf, 1, 2))) int Printf(const char* fmtstr, ...){
             }
 
             // print integer
-            case 'd':{
-                const char* tmp = utostr(va_arg(vl, int));
+            case 'i':{
+                const char* tmp = nullptr;
+                if(longEnable){
+                    tmp = itostr(va_arg(vl, int64_t));
+                    longEnable = false;
+                }else{
+                    tmp = itostr(va_arg(vl, int32_t));
+                }
+
+                strcpy(&kprintf_buff[finalstrsz], tmp);
+                finalstrsz += strlen(tmp);
+                break;
+            }
+
+            // print integer
+            case 'u':{
+                const char* tmp = nullptr;
+                if(longEnable){
+                    tmp = utostr(va_arg(vl, uint64_t));
+                    longEnable = false;
+                }else{
+                    tmp = utostr(va_arg(vl, uint32_t));
+                }
+
                 strcpy(&kprintf_buff[finalstrsz], tmp);
                 finalstrsz += strlen(tmp);
                 break;
             }
 
             case 'x':{
-                const char* tmp = utohexstr(va_arg(vl, uint32_t));
+                const char* tmp = nullptr;
+                if(longEnable){
+                    tmp = utohexstr(va_arg(vl, int64_t));
+                    longEnable = false;
+                }else{
+                    tmp = utohexstr(va_arg(vl, int32_t));
+                }
+
                 strcpy(&kprintf_buff[finalstrsz], tmp);
                 finalstrsz += strlen(tmp);
                 break;

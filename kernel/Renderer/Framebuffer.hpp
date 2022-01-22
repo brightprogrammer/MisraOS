@@ -1,14 +1,22 @@
+/**
+ *@file Framebuffer.hpp
+ *@author Siddharth Mishra (brightprogrammer)
+ *@date 01/08/2022
+ *@brief Framebuffer helper class
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
+ **/
+
 #ifndef FRAMEBUFFER_HPP
 #define FRAMEBUFFER_HPP
 
-#include "../Bootloader/stivale2.h"
+#include <cstdint>
 
 // basic framebuffer information
 // a framebuffer is where renderer draws things
 struct Framebuffer{
-    // Constructor needs the framebuffer tag returned from bootloader
-    // in the kernel entry. Framebuffer tag is requested in Bootloader/Utils.cpp
-    Framebuffer(stivale2_struct_tag_framebuffer* framebuffer_tag);
+    // default framebuffer constructor
+    // uses the framebuffer information provided in bootinfo
+    Framebuffer();
 
     // access a pixel in r-th row and c-th column
     uint32_t& operator () (uint32_t r, uint32_t c);

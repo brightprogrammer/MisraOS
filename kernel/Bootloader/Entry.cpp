@@ -1,6 +1,8 @@
 #include "BootInfo.hpp"
 #include "Util.hpp"
 
+#include "../Renderer/FontRenderer.hpp"
+
 // declare kenrel entry here and define it in KernelEntry.cpp
 void KernelEntry();
 
@@ -14,6 +16,9 @@ extern "C" [[noreturn]] void Entry(stivale2_struct* tagList){
     // this will load all things required by kernel to this struct
     // and then kernel can access parts from this
     BootInfo bootInfo(tagList);
+
+    // setup font renderer before calling kernel entry
+    CreateDefaultFontRenderer();
 
     // handover control to kernel
     KernelEntry();

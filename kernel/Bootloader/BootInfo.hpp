@@ -4,6 +4,9 @@
 #include "stivale2.h"
 #include <cstdint>
 
+// typedef for shorter name
+typedef stivale2_mmap_entry MemMapEntry;
+
 // contains boot information needed by the kernel
 struct BootInfo {
     BootInfo() = default;
@@ -16,6 +19,9 @@ struct BootInfo {
 
     static uint64_t GetKernelPhysicalBase();
     static uint64_t GetKernelVirtualBase();
+
+    static uint64_t GetMemmapCount();
+    static MemMapEntry* GetMemmap();
 private:
     // framebuffer information
     static inline uint64_t fbAddr = 0;
@@ -26,8 +32,9 @@ private:
     // kernel information
     static inline uint64_t krnlPhysAddr = 0;
     static inline uint64_t krnlVirtAddr = 0;
+
+    // store memory region related data
+    static inline stivale2_struct_tag_memmap* memmap_tag = nullptr;
 };
-
-
 
 #endif // BOOTINFO_HPP

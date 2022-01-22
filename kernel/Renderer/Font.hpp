@@ -20,6 +20,8 @@ Bitmap GetFontBitmap();
 
 // contains basic font related information
 struct Font{
+    Font();
+
     Bitmap bitmap;
     uint8_t font_width;
     uint8_t font_height;

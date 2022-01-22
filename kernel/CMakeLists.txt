@@ -4,8 +4,8 @@
 
 # set sources
 set(KERNEL_SRCS "KernelEntry.cpp" "Renderer/Framebuffer.cpp" "Renderer/FontRenderer.cpp" "Renderer/Font.cpp" "String.cpp"
-    "GDT.cpp" "Utils/Bitmap.cpp" "Bootloader/Util.cpp" "Print.cpp"
-    "PhysicalMemoryManager.cpp" "VirtualMemoryManager.cpp")
+    "GDT.cpp" "Utils/Bitmap.cpp" "Bootloader/Util.cpp"
+    "PhysicalMemoryManager.cpp" "VirtualMemoryManager.cpp" "Printf.cpp" "Bootloader/Entry.cpp" "Bootloader/BootInfo.cpp")
 
 # make kernel as executable
 add_executable(kernel ${KERNEL_SRCS})
@@ -15,7 +15,7 @@ target_compile_options(kernel PRIVATE   -Wall -Wextra -O0 -g
                                         -ffreestanding
                                         -fno-stack-protector
                                         -fno-pic -fpie
-                                        -mgeneral-regs-only
+                                        #-mgeneral-regs-only
                                         -fno-exceptions
                                         -mno-red-zone)
 # set linker options

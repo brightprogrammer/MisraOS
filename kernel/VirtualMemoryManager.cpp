@@ -1,7 +1,16 @@
+/**
+ *@file VirtualMemoryManager.cpp
+ *@author Siddharth Mishra (brightprogrammer)
+ *@date 01/20/2022
+ *@brief Handles virtual memory mapping and stuffs
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
+ **/
+
 #include "VirtualMemoryManager.hpp"
 #include "PhysicalMemoryManager.hpp"
 #include "String.hpp"
-#include "Print.hpp"
+#include "Printf.hpp"
+#include "Bootloader/BootInfo.hpp"
 
 // A page map level 4 (PML4) contains 512 page directory pointer tables (PDP Tables)
 // A PDP table is an array of 512 page ditectories (PDs)
@@ -25,7 +34,7 @@
 // is a page table entry that stores address of lower level's page table
 
 
-VirtualMemoryManager::VirtualMemoryManager(PageTable* pageMapTable, stivale2_struct_tag_memmap *memmap_tag){
+VirtualMemoryManager::VirtualMemoryManager(PageTable* pageMapTable){
     pml4 = pageMapTable;
 
     // // map first 4GB of memory
@@ -38,24 +47,31 @@ VirtualMemoryManager::VirtualMemoryManager(PageTable* pageMapTable, stivale2_str
     //     MapMemory(KERNEL_BASE + p, p);
     // }
 
-    stivale2_mmap_entry *memmap = memmap_tag->memmap;
-    uint64_t memmap_entries = memmap_tag->entries;
+    MemMapEntry* memmap = BootInfo::GetMemmap();
+    uint64_t memmap_entries = BootInfo::GetMemmapCount();
     for (size_t i = 0; i < memmap_entries; i++) {
-        // map kernel
-        if(memmap[i].type == STIVALE2_MMAP_KERNEL_AND_MODULES){
-            for (uintptr_t p = 0; p < memmap[i].length; p += PAGE_SIZE)
-                MapMemory(KERNEL_BASE + p, memmap[i].base + p);
+        // get memory region
+        MemMapEntry region = memmap[i];
+        if(region.type == STIVALE2_MMAP_KERNEL_AND_MODULES){
+            for (uintptr_t p = 0; p < region.length; p += PAGE_SIZE){
+                uint64_t vaddr = KERNEL_VIRT_BASE + p;
+                uint64_t paddr = region.base + p;
+                MapMemory(vaddr, paddr);
+            }
         }
 
         // map framebuffer
-        else if(memmap[i].type == STIVALE2_MMAP_FRAMEBUFFER){
-            for (uintptr_t p = 0; p < memmap[i].length; p += PAGE_SIZE)
-                MapMemory(MEM_PHYS_OFFSET + memmap[i].base + p, memmap[i].base + p);
+        else if(region.type == STIVALE2_MMAP_FRAMEBUFFER){
+            for (uintptr_t p = 0; p < region.length; p += PAGE_SIZE){
+                uint64_t vaddr = HIGHER_HALF_MEM_VIRT_OFFSET + region.base + p;
+                uint64_t paddr =  region.base + p;
+                MapMemory(vaddr,paddr);
+            }
         }
 
         // map other memories
         else{
-            for (uintptr_t p = 0; p < memmap[i].length; p += PAGE_SIZE)
+            for (uintptr_t p = 0; p < region.length; p += PAGE_SIZE)
                 MapMemory(p, p);
         }
     }
@@ -116,27 +132,27 @@ void VirtualMemoryManager::MapMemory(uint64_t virtualAddress, uint64_t physicalA
     // get page directory pointer from PML4
     PageTable* pml3 = GetNextLevel(pml4, pml3Index, true);
     if(pml3 == nullptr){
-        PrintError("Failed to get PML3\n");
+        Printf("[-] Failed to get PML3\n");
     }
 
     // get page directory from page directory pointer
     PageTable* pml2 = GetNextLevel(pml3, pml2Index, true);
     if(pml2 == nullptr){
-        PrintError("Failed to get PML2\n");
+        Printf("[-] Failed to get PML2\n");
     }
 
 
     // get page table from page directory
     PageTable* pml1 = GetNextLevel(pml2, pml1Index, true);
     if(pml1 == nullptr){
-        PrintError("Failed to get PML1\n");
+        Printf("[-] Failed to get PML1\n");
     }
 
 
     // get page from page table
     PageDirectoryEntry *pde = &pml1->entries[pageIndex];
     if(pde == nullptr){
-        PrintError("Failed to get Page\n");
+        Printf("[-] Failed to get Page\n");
     }
 
     pde->address = (physicalAddress >> 12);

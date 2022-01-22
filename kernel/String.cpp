@@ -108,10 +108,128 @@ const char* utohexstr(uint64_t n){
     return int_to_string_buffer;
 }
 
-// memset
-void memset(void* src, char c, size_t n){
-    uint8_t* u8src = (uint8_t*)src;
-    for(size_t i = 0; i < n; i++){
-        u8src[i] = c;
+// compare two memory regions for n bytes
+int64_t memcmp(const void* m1, const void* m2, size_t n){
+    if(n > 8){
+        // check remainder bytes
+        const uint8_t* u8m1 = reinterpret_cast<const uint8_t*>(m1);
+        const uint8_t* u8m2 = reinterpret_cast<const uint8_t*>(m2);
+        size_t i = 0;
+        for(i = 0; i < n % 8; i++){
+            if(u8m1[i] != u8m2[i]) return (u8m1[i] - u8m2[i]);
+        }
+
+        // comparing 8 bytes at once will be faster since 64 bit register will
+        // be used at once, this means less looping
+        const uint64_t* u64m1 = reinterpret_cast<const uint64_t*>(u8m1 + i);
+        const uint64_t* u64m2 = reinterpret_cast<const uint64_t*>(u8m2 + i);
+        for(i = 0; i < n / 8 ; i++){
+            if(u64m1[i] != u64m2[i]) return (u64m1[i] - u64m2[i]);
+        }
+    }else{
+        // check remainder bytes
+        const uint8_t* u8m1 = reinterpret_cast<const uint8_t*>(m1);
+        const uint8_t* u8m2 = reinterpret_cast<const uint8_t*>(m2);
+        size_t i = 0;
+        for(i = 0; i < n; i++){
+            if(u8m1[i] != u8m2[i]) return (u8m1[i] - u8m2[i]);
+        }
     }
+
+    return 0;
+}
+
+// copies the given byte to a bigger memory space by repeating it again and again
+template<typename t>
+t repeat_expand(char c){
+    if(sizeof(t) == 64){
+        return (c | c << 8 | c << 16 | c << 24 | uint64_t(c) << 32 | uint64_t(c) << 48 |  uint64_t(c) << 56);
+    } else if (sizeof(t) == 32){
+        return (c | c << 8 | c << 16 | c << 24);
+    } else if (sizeof(t) == 16){
+        return (c | c << 8);
+    } else {
+        return c;
+    }
+}
+
+// memset
+void* memset(void* dst, char c, size_t n){
+    if(n > 8){
+        // set remainder bytes in the beginning to given byte
+        uint8_t* u8dst = reinterpret_cast<uint8_t*>(dst);
+        size_t i = 0;
+        for(i = 0; i < n % 8; i++){
+            u8dst[i] = c;
+        }
+
+        // memsetting 8 bytes at once will be faster
+        uint64_t* u64dst = reinterpret_cast<uint64_t*>(u8dst + i);
+        uint64_t C = repeat_expand<uint64_t>(c);
+        for(i = 0; i < n / 8 ; i++){
+            u64dst[i] = C;
+        }
+    }else{
+        // if less than 8 then just use byte by byte method
+        uint8_t* u8dst = reinterpret_cast<uint8_t*>(dst);
+        for(size_t i = 0; i < n; i++){
+            u8dst[i] = c;
+        }
+    }
+
+    return dst;
+}
+
+// copy memory from src to dst
+void* memcpy(void *dst, const void* src, size_t n){
+    if(n >= 8){
+        // set remainder bytes in the beginning to given byte
+        const uint8_t* u8src = reinterpret_cast<const uint8_t*>(src);
+        uint8_t* u8dst = reinterpret_cast<uint8_t*>(dst);
+        size_t i = 0;
+        for(i = 0; i < n % 8; i++){
+            u8dst[i] = u8src[i];
+        }
+
+        // memsetting 8 bytes at once will be faster
+        const uint64_t* u64src = reinterpret_cast<const uint64_t*>(u8src + i);
+        uint64_t* u64dst = reinterpret_cast<uint64_t*>(u8dst + i);
+        for(i = 0; i < n / 8 ; i++){
+            u64dst[i] = u64src[i];
+        }
+    }else{
+        // if less than 8 then just use byte by byte method
+        const uint8_t* u8src = reinterpret_cast<const uint8_t*>(src);
+        uint8_t* u8dst = reinterpret_cast<uint8_t*>(dst);
+        for(size_t i = 0; i < n; i++){
+            u8dst[i] = u8src[i];
+        }
+    }
+
+    return dst;
+}
+
+// check whether two strings are same or not
+int64_t strcmp(const char* s1, const char* s2){
+    if(strlen(s1) != strlen(s2)){
+        return -1;
+    }else{
+        return memcmp(s1, s2, strlen(s1));
+    }
+}
+
+// copy contents fromm src string to dst string
+char* strcpy(char* dst, const char *src){
+    return reinterpret_cast<char*>(memcpy(dst, src, strlen(src)));
+}
+
+// concatenate two strings
+char* strcat(char* dst, const char* src){
+    memcpy(dst + strlen(dst), src, strlen(src));
+    dst[strlen(dst) + strlen(src) - 1] = 0;
+    return dst;
+}
+
+bool isdigit(char c){
+    return ('0' <= c) && (c <= '9');
 }

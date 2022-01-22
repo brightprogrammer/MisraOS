@@ -1,11 +1,20 @@
-#include "Framebuffer.hpp"
+/**
+ *@file Framebuffer.cpp
+ *@author Siddharth Mishra (brightprogrammer)
+ *@date 01/08/2022
+ *@brief Framebuffer helper class
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
+ **/
 
-// constructor
-Framebuffer::Framebuffer(stivale2_struct_tag_framebuffer* framebuffer_tag){
-    address = reinterpret_cast<uint32_t*>(framebuffer_tag->framebuffer_addr);
-    width = framebuffer_tag->framebuffer_width;
-    height = framebuffer_tag->framebuffer_height;
-    pitch = framebuffer_tag->framebuffer_pitch;
+#include "Framebuffer.hpp"
+#include "../Bootloader/BootInfo.hpp"
+
+// default constructor uses boot info
+Framebuffer::Framebuffer(){
+    address = reinterpret_cast<uint32_t*>(BootInfo::GetFramebufferAddress());
+    width = BootInfo::GetFramebufferWidth();
+    height = BootInfo::GetFramebufferHeight();
+    pitch = BootInfo::GetFramebufferPitch();
 }
 
 // define operator

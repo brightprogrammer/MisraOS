@@ -10,42 +10,24 @@
 #include "../String.hpp"
 
 // default font renderer
-FontRenderer *defaultFontRenderer;
+static FontRenderer DefaultFontRenderer;
 
-// create font renderer using default information
-FontRenderer::FontRenderer(const Framebuffer& framebuffer) noexcept :
-    framebuffer(framebuffer){
-        font = {
-            .bitmap = GetFontBitmap(),
-            .font_width = FONT_WIDTH,
-            .font_height = FONT_HEIGHT
-        };
-
-        foregroundColour = 0xff2997ff;
-        backgroundColour = 0x00000000;
-        xpos = 0;
-        ypos = 0;
-}
-
-// create renderer with given data
-FontRenderer::FontRenderer(const Framebuffer& framebuffer, const Font& font) noexcept :
-    framebuffer(framebuffer), font(font){
-
-    foregroundColour = 0xff2997ff;
-    backgroundColour = 0x00000000;
-
-    xpos = 0;
-    ypos = 0;
+void CreateDefaultFontRenderer(){
+    DefaultFontRenderer = FontRenderer();
 }
 
 // default font renderer
 void SetDefaultFontRenderer(FontRenderer& fontRenderer){
-    defaultFontRenderer = &fontRenderer;
+    DefaultFontRenderer = fontRenderer;
 }
 
-// get font renderer
-FontRenderer* GetDefaultFontRenderer(){
-    return defaultFontRenderer;
+FontRenderer& GetDefaultFontRenderer(){
+    return DefaultFontRenderer;
+}
+
+FontRenderer::FontRenderer(){
+    framebuffer = Framebuffer();
+    font = Font();
 }
 
 // draw string at position in fontRenderer
@@ -72,7 +54,6 @@ void FontRenderer::DrawCharacter(char c){
             }
         }
     }
-
 }
 
 // draw string at position contained in fontRenderer
@@ -107,4 +88,14 @@ void FontRenderer::DrawString(const char* str){
         // keep increasing position
         xpos += font.font_width;
     }
+}
+
+// draw character
+void DrawCharacter(char c){
+    DefaultFontRenderer.DrawCharacter(c);
+}
+
+// draw string
+void DrawString(const char* str){
+    DefaultFontRenderer.DrawString(str);
 }

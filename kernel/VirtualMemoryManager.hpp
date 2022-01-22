@@ -1,11 +1,19 @@
+/**
+ *@file VirtualMemoryManager.hpp
+ *@author Siddharth Mishra (brightprogrammer)
+ *@date 01/20/2022
+ *@brief Handles virtual memory mapping and stuffs
+ *@copyright Copyright (c) 2022 Siddharth Mishra CC BY-SA 3.0
+ **/
+
 #ifndef VIRTUALMEMORYMANAGER_HPP
 #define VIRTUALMEMORYMANAGER_HPP
 
 #include <cstdint>
 #include "PhysicalMemoryManager.hpp"
 
-#define MEM_PHYS_OFFSET 0xffff800000000000
-#define KERNEL_BASE 0xffffffff80000000
+#define HIGHER_HALF_MEM_VIRT_OFFSET 0xffff800000000000
+#define KERNEL_VIRT_BASE 0xffffffff80000000
 
 // page and page directory pointer use the same structure
 struct PageDirectoryEntry {
@@ -43,7 +51,7 @@ struct PageTable {
 // vmm implementation
 struct VirtualMemoryManager{
     // create virtual memory manager
-    VirtualMemoryManager(PageTable* PML4Address, stivale2_struct_tag_memmap *memmap);
+    VirtualMemoryManager(PageTable* PML4Address);
 
     // map physical address to given virtual address
     void MapMemory(uint64_t virtualAddress, uint64_t physicalAddress);

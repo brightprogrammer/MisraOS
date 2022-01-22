@@ -22,6 +22,9 @@ BootInfo::BootInfo(stivale2_struct* stivaleTagList){
     stivale2_struct_tag_kernel_base_address *kaddr_tag = reinterpret_cast<stivale2_struct_tag_kernel_base_address*>(StivaleGetTag(stivaleTagList, STIVALE2_STRUCT_TAG_KERNEL_BASE_ADDRESS_ID));
     krnlPhysAddr = kaddr_tag->physical_base_address;
     krnlVirtAddr = kaddr_tag->virtual_base_address;
+
+    // get memmap tag
+    memmap_tag = reinterpret_cast<stivale2_struct_tag_memmap*>(StivaleGetTag(stivaleTagList, STIVALE2_STRUCT_TAG_MEMMAP_ID));
 }
 
 uint64_t BootInfo::GetFramebufferAddress(){ return fbAddr; }
@@ -31,3 +34,6 @@ uint16_t BootInfo::GetFramebufferPitch(){ return fbPitch; }
 
 uint64_t BootInfo::GetKernelPhysicalBase(){ return krnlPhysAddr; }
 uint64_t BootInfo::GetKernelVirtualBase(){ return krnlVirtAddr; }
+
+uint64_t BootInfo::GetMemmapCount(){ return memmap_tag->entries; }
+MemMapEntry* BootInfo::GetMemmap(){ return memmap_tag->memmap; }
