@@ -4,6 +4,9 @@
 #include <cstdint>
 #include "PhysicalMemoryManager.hpp"
 
+#define MEM_PHYS_OFFSET 0xffff800000000000
+#define KERNEL_BASE 0xffffffff80000000
+
 // page and page directory pointer use the same structure
 struct PageDirectoryEntry {
     // is the page directory that this entry is pointing to present?
@@ -40,10 +43,13 @@ struct PageTable {
 // vmm implementation
 struct VirtualMemoryManager{
     // create virtual memory manager
-    VirtualMemoryManager(PageTable* PML4Address);
+    VirtualMemoryManager(PageTable* PML4Address, stivale2_struct_tag_memmap *memmap);
 
     // map physical address to given virtual address
     void MapMemory(uint64_t virtualAddress, uint64_t physicalAddress);
+
+    // check if page map for a virtual address exists or not
+
 private:
     // get's the next level in page table tree
     PageTable* GetNextLevel(PageTable* pageTable, uint64_t entryIndex, bool allocate);

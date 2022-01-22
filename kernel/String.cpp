@@ -89,7 +89,9 @@ const char* utohexstr(uint64_t n){
     for(int8_t i = size - 1; i >= 0; i--){
         // null terminate string in the end
         if(x == 0){
-            int_to_string_buffer[i] = 0;
+            int_to_string_buffer[size] = 0;
+            // null terminate one more for safety
+            int_to_string_buffer[size + 1] = 0;
             break;
         }
 
@@ -98,6 +100,10 @@ const char* utohexstr(uint64_t n){
         int_to_string_buffer[i] = hex_digits[first_nibble];
         x = x >> 4;
     }
+
+    int_to_string_buffer[size] = 0;
+    // null terminate one more for safety
+    int_to_string_buffer[size + 1] = 0;
 
     return int_to_string_buffer;
 }

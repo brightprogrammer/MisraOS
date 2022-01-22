@@ -25,8 +25,46 @@
 // is a page table entry that stores address of lower level's page table
 
 
-VirtualMemoryManager::VirtualMemoryManager(PageTable* pageMapTable){
+VirtualMemoryManager::VirtualMemoryManager(PageTable* pageMapTable, stivale2_struct_tag_memmap *memmap_tag){
     pml4 = pageMapTable;
+
+    // // map first 4GB of memory
+    // for (uintptr_t p = 0; p < 0x100000000 /*4GiB*/; p += PAGE_SIZE) {
+    //     MapMemory(MEM_PHYS_OFFSET + p, p);
+    // }
+
+    // // map 2 GB memory starting from kernel base
+    // for (uintptr_t p = 0; p < 0x80000000 /*2GiB*/; p += PAGE_SIZE) {
+    //     MapMemory(KERNEL_BASE + p, p);
+    // }
+
+    stivale2_mmap_entry *memmap = memmap_tag->memmap;
+    uint64_t memmap_entries = memmap_tag->entries;
+    for (size_t i = 0; i < memmap_entries; i++) {
+        // map kernel
+        if(memmap[i].type == STIVALE2_MMAP_KERNEL_AND_MODULES){
+            for (uintptr_t p = 0; p < memmap[i].length; p += PAGE_SIZE)
+                MapMemory(KERNEL_BASE + p, memmap[i].base + p);
+        }
+
+        // map framebuffer
+        else if(memmap[i].type == STIVALE2_MMAP_FRAMEBUFFER){
+            for (uintptr_t p = 0; p < memmap[i].length; p += PAGE_SIZE)
+                MapMemory(MEM_PHYS_OFFSET + memmap[i].base + p, memmap[i].base + p);
+        }
+
+        // map other memories
+        else{
+            for (uintptr_t p = 0; p < memmap[i].length; p += PAGE_SIZE)
+                MapMemory(p, p);
+        }
+    }
+
+    // load the page map table in cr3 register
+    asm volatile("mov %0, %%cr3"
+                 :
+                 : "r" (pageMapTable));
+
 }
 
 // get next level of paging

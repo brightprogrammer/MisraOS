@@ -4,7 +4,7 @@
 // we cannot dynamically allocate anything now
 // so will initialize stack as an array in .bss and tell stivale
 // where our stack is
-#define STACK_SIZE (32*KB)
+#define STACK_SIZE (16*KB)
 static uint8_t stack[STACK_SIZE];
 
 // we need a framebuffer from stivale on bootup so we
