@@ -26,18 +26,14 @@ void KernelEntry() {
     Printf("[+] Initializing Global Descriptor Table\n");
     InstallGDT();
 
-    // NOTE : Initialize memory manager only once
+    // create pmm
     PhysicalMemoryManager pmm;
     Printf("[+] Created Physical Memory Manager\n");
 
     // show memory statistics
     pmm.ShowStatistics();
 
-    // create empty page map table
-    PageTable* pageMapTable = reinterpret_cast<PageTable*>(pmm.AllocatePage());
-    memset(reinterpret_cast<void*>(pageMapTable), 0, PAGE_SIZE);
-
     // create vmm
-    VirtualMemoryManager vmm(pageMapTable);
+    VirtualMemoryManager vmm;
     Printf("[+] Created Virtual Memory Manager\n");
 }

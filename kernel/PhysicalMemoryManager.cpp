@@ -27,7 +27,7 @@ struct MemoryBlock{
 
 PhysicalMemoryManager::PhysicalMemoryManager(){
     if(isInitialized){
-        Printf("Another initialization of PhysicalMemoryManager");
+        return;
     }
 
     numMemmapEntries = BootInfo::GetMemmapCount();

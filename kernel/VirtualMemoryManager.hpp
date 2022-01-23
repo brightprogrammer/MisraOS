@@ -16,7 +16,7 @@
 #define KERNEL_VIRT_BASE 0xffffffff80000000
 
 // page and page directory pointer use the same structure
-struct PageDirectoryEntry {
+struct Page {
     // is the page directory that this entry is pointing to present?
     bool present : 1;
     // is the page in question is read only or read/write?
@@ -44,26 +44,38 @@ struct PageDirectoryEntry {
 
 // page table and page map level 4 use the same structure
 struct PageTable {
-    PageDirectoryEntry entries[512];
+    Page entries[512];
 } __attribute__((aligned(0x1000)));
 
 
 // vmm implementation
 struct VirtualMemoryManager{
     // create virtual memory manager
-    VirtualMemoryManager(PageTable* PML4Address);
+    VirtualMemoryManager();
 
     // map physical address to given virtual address
     void MapMemory(uint64_t virtualAddress, uint64_t physicalAddress);
 
-    // check if page map for a virtual address exists or not
+    // create page mapping
+    void CreatePageMap();
 
+    // get page for given virtual address
+    // if allocate is true then required page and page tables
+    // will be allocated if not already allocated
+    Page* GetPage(uint64_t vaddr, bool allocate);
+
+    // load this page table in cr3 register
+    void LoadPageTable();
 private:
+
     // get's the next level in page table tree
     PageTable* GetNextLevel(PageTable* pageTable, uint64_t entryIndex, bool allocate);
 
+    // vmm's own pmm
     static inline PhysicalMemoryManager pmm = {};
-    PageTable* pml4;
+
+    // root element of the page map tree
+    PageTable* pml4 = nullptr;
 };
 
 #endif // VIRTUALMEMORYMANAGER_HPP

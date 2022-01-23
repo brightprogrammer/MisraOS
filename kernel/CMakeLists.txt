@@ -11,11 +11,13 @@ set(KERNEL_SRCS "KernelEntry.cpp" "Renderer/Framebuffer.cpp" "Renderer/FontRende
 add_executable(kernel ${KERNEL_SRCS})
 
 # set compile options
-target_compile_options(kernel PRIVATE   -Wall -Wextra -O0 -g
+target_compile_options(kernel PRIVATE   -Wall -Wextra -O2
                                         -ffreestanding
                                         -fno-stack-protector
                                         -fno-pic -fpie
-                                        #-mgeneral-regs-only
+                                        -mgeneral-regs-only
+                                        -mno-sse
+                                        -mno-avx
                                         -fno-exceptions
                                         -mno-red-zone)
 # set linker options
