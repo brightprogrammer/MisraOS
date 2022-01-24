@@ -78,10 +78,10 @@ struct GDTEntry {
 
 struct GDT{
     GDTEntry null;
-    GDTEntry kernel_code;
-    GDTEntry kernel_data;
-    GDTEntry user_code;
-    GDTEntry user_data;
+    GDTEntry kernelCode;
+    GDTEntry kernelData;
+    GDTEntry userCode;
+    GDTEntry userData;
 } __attribute__((packed)) __attribute__((aligned(0x1000)));
 
 // install kernel's global descriptor table in gdtr

@@ -38,10 +38,9 @@
 #define VIRTUALMEMORYMANAGER_HPP
 
 #include <cstdint>
-#include "PhysicalMemoryManager.hpp"
 
-#define HIGHER_HALF_MEM_VIRT_OFFSET 0xffff800000000000
-#define KERNEL_VIRT_BASE 0xffffffff80000000
+#define MEM_PHYS_OFFSET uint64_t(0xffff800000000000)
+#define KERNEL_VIRT_BASE uint64_t(0xffffffff80000000)
 
 enum PageFlags {
     MAP_PRESENT = 1 << 0,
@@ -103,11 +102,11 @@ private:
     // get's the next level in page table tree
     PageTable* GetNextLevel(PageTable* pageTable, uint64_t entryIndex, bool allocate);
 
-    // vmm's own pmm
-    static inline PhysicalMemoryManager pmm = {};
-
     // root element of the page map tree
     PageTable* pml4 = nullptr;
+
+    // store pml4 physicall address
+    uint64_t pml4PhysicalAddress = 0;
 };
 
 #endif // VIRTUALMEMORYMANAGER_HPP

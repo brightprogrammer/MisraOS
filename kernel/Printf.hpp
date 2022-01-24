@@ -37,6 +37,7 @@
 #ifndef PRINTF_HPP
 #define PRINTF_HPP
 
-__attribute__ ((format (printf, 1, 2))) int Printf (const char* fmtstr, ...);
+__attribute__ ((format (printf, 1, 2))) __attribute__((no_caller_saved_registers))
+int Printf (const char* fmtstr, ...);
 
 #endif // PRINTF_HPP

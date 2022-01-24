@@ -34,23 +34,51 @@
  */
 
 #include "IDT.hpp"
+#include "PhysicalMemoryManager.hpp"
+#include "VirtualMemoryManager.hpp"
+#include "Interrupts.hpp"
+#include "Printf.hpp"
 
-static idt_pointer_t idt_pointer;
+#define IDT_ENTRY_OFFSET_LOW_MASK uint64_t(0xffff)
+#define IDT_ENTRY_OFFSET_MIDDLE_MASK uint64_t(0xffff0000)
+#define IDT_ENTRY_OFFSET_HIGH_MASK uint64_t(0xffffffff00000000)
 
-void set_idt_entry_offset(idt_entry_t *idt_entry, uint64_t offset){
-    idt_entry->offset_low = (uint16_t)(offset & 0xffff);
-    idt_entry->offset_middle = (uint16_t)(offset & 0xffff0000);
-    idt_entry->offset_high = (uint32_t)(offset & 0xffffffff00000000);
+static IDTR idtr;
+
+// set offset in this idt entry
+void IDTEntry::SetOffset(uint64_t offset){
+    offsetLow = uint16_t(offset & IDT_ENTRY_OFFSET_LOW_MASK);
+    offsetMiddle = uint16_t((offset & IDT_ENTRY_OFFSET_MIDDLE_MASK) >> 16);
+    offsetHigh = uint32_t((offset & IDT_ENTRY_OFFSET_HIGH_MASK) >> 32);
 }
 
-uint64_t get_idt_entry_offset(idt_entry_t* idt_entry){
+// get offset from this idt entry
+uint64_t IDTEntry::GetOffset(){
     uint64_t offset = 0;
-    offset = ((uint64_t)idt_entry->offset_high << 32) | ((uint64_t)idt_entry->offset_middle << 16) | ((uint64_t)idt_entry->offset_low);
+
+    offset = (uint64_t(offsetHigh) << 32) |
+        (uint64_t(offsetMiddle) << 16) |
+        uint64_t(offsetLow);
 
     return offset;
 }
 
-void initialize_interrupt_descriptor_table(){
-    idt_pointer.limit = 0x0fff;
-    idt_pointer.offset = (uint64_t)0;
+void InstallIDT(){
+    idtr.limit = PAGE_SIZE - 1;
+    idtr.offset = PhysicalMemoryManager::AllocatePage();
+
+    // create page fault handler
+    // note that we're actually allocating the interrupt gate here at 0xe offset
+    // 0xe offset is for page fault interrupt
+    IDTEntry* pageFaultInt = reinterpret_cast<IDTEntry*>(idtr.offset + 0x0e * sizeof(IDTEntry));
+    pageFaultInt->SetOffset(reinterpret_cast<uint64_t>(PageFaultHandler));
+  //  uint64_t off = pageFaultInt->GetOffset();
+    pageFaultInt->typeAttr = IDT_TYPE_ATTR_INTERRUPT_GATE;
+    pageFaultInt->selector = 0x08; // offset of kernelCode in GDT
+
+    asm volatile ("lidt %0"
+                  :
+                  : "m"(idtr));
+
+//    while(true) asm("hlt");
 }

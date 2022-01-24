@@ -42,6 +42,8 @@
 #include "Bootloader/BootInfo.hpp"
 #include "Bootloader/Util.hpp"
 
+#define MEM_PHYS_OFFSET 0xffff800000000000
+
 // defines a memory block
 struct MemoryBlock{
     uint64_t base = 0;
@@ -92,7 +94,7 @@ PhysicalMemoryManager::PhysicalMemoryManager(){
     }
 
     // set pages at the start of this memory region
-    pageStack = reinterpret_cast<uint64_t*>(largestMemBlock.base);
+    pageStack = reinterpret_cast<uint64_t*>(largestMemBlock.base + MEM_PHYS_OFFSET);
     // mark this memory as used
     freeMemory -= numPagesUsedByStack * PAGE_SIZE;
     usedMemory += numPagesUsedByStack * PAGE_SIZE;
@@ -111,7 +113,7 @@ PhysicalMemoryManager::PhysicalMemoryManager(){
             for(size_t j = 0; j < numPages ; j++){
                 // if this page's limit is less than this block's limit then add it
                 if((memmapEntries[i].base + (j + 1) * PAGE_SIZE) <= memmapEntries[i].base + memmapEntries[i].length){
-                    pageStack[currentStackSize] = memmapEntries[i].base + (j * PAGE_SIZE);
+                    pageStack[currentStackSize] = MEM_PHYS_OFFSET + memmapEntries[i].base + (j * PAGE_SIZE);
                     currentStackSize++;
                 }
             }
@@ -125,7 +127,9 @@ PhysicalMemoryManager::PhysicalMemoryManager(){
     for(size_t i = 0; i < maxAvailablePages; i++){
         // check if page's limit is less than memory block's limit
         if((startAddress + (i + 1) * PAGE_SIZE) <= largestMemBlock.GetLimit()){
-            pageStack[currentStackSize] = startAddress + (i * PAGE_SIZE);
+            // limine already maps addresses to higher half
+            // so we have to add that offset to all page addresses
+            pageStack[currentStackSize] = MEM_PHYS_OFFSET + startAddress + (i * PAGE_SIZE);
             currentStackSize++;
         }
     }
@@ -173,6 +177,7 @@ uint64_t* PhysicalMemoryManager::AllocatePages(size_t n){
 // free a single page
 void PhysicalMemoryManager::FreePage(uint64_t page){
     bool freeable = true;
+    page -= MEM_PHYS_OFFSET;
     for(uint64_t i = 0; i < numMemmapEntries; i++){
         if(memmapEntries[i].type != STIVALE2_MMAP_USABLE){
             // check if any part of this page is inside a reserved region

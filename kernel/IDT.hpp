@@ -38,33 +38,50 @@
 
 #include <stdint.h>
 
-#define IDT_TYPE_ATTR_InterruptGate 0b10001110
-#define IDT_TYPE_ATTR_CallGate 0b10001100
-#define IDT_TYPE_ATTR_TrapGate 0b10001111
+// type attr field structure
+// | 7 | 6,5 | 4 | 3,2,1,0  |
+// | P | DPL | S | GateType |
+// p bit mist always be true if this gate is a valid gate!
+#define IDT_TYPE_ATTR_INTERRUPT_GATE 0b10001110
+#define IDT_TYPE_ATTR_CALL_GATE 0b10001100
+#define IDT_TYPE_ATTR_TRAP_GATE 0b10001111
 
 // idt entry structure
+// interrupt gate and trap gate have same structure
+// https://wiki.osdev.org/Interrupt_Descriptor_Table
 typedef struct {
-    uint16_t offset_low;
-    uint16_t selector;
+    uint16_t offsetLow;
+    uint16_t selector; // switch to the "selected" gdt or ldt segment segment
     uint8_t ist;
-    uint8_t type_attr;
-    uint16_t offset_middle;
-    uint32_t offset_high;
-    uint32_t reserved;
-} __attribute__((packed)) idt_entry_t;
 
-// set offset for an idt entry
-void set_idt_entry_offset(idt_entry_t* idt_entry, uint64_t offset);
-// get offset from an idt entry
-uint64_t get_idt_entry_offset(idt_entry_t* idt_entry);
+    /*
+     --- examples of typeAttr value ---
+     64-bit Interrupt Gate: 0x8E (p=1, dpl=0b00, type=0b1110 => type_attributes=0b1000_1110=0x8E)
+     64-bit Trap Gate: 0x8F (p=1, dpl=0b00, type=0b1111 => type_attributes=1000_1111b=0x8F)
+
+     --- examples of type values ---
+     0b1110 or 0xE: 64-bit Interrupt Gate
+     0b1111 or 0xF: 64-bit Trap Gate
+     */
+    uint8_t typeAttr;
+
+    uint16_t offsetMiddle;
+    uint32_t offsetHigh;
+
+    // this is reserved for future use
+    uint32_t reserved;
+
+    void SetOffset(uint64_t offset);
+    uint64_t GetOffset();
+} __attribute__((packed)) IDTEntry;
 
 // idtr register structure
 typedef struct {
     uint16_t limit;
     uint64_t offset;
-} __attribute__((packed)) idt_pointer_t;
+} __attribute__((packed)) IDTR;
 
 // you know what this does!
-void initialize_interrupt_descriptor_table();
+void InstallIDT();
 
 #endif // IDT_HPP

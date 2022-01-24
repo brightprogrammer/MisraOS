@@ -68,7 +68,7 @@ void LoadGDTR(){
                  "mov %0, %%fs\n"
                  "mov %0, %%ss\n"
                  :
-                 : "a"((uint16_t)0x10)); // offset to data segment
+                 : "a"(uint16_t(0x10))); // offset to data segment
 }
 
 // create a new gdt entry using given values
@@ -98,10 +98,10 @@ void InstallGDT(){
     // createGDTEntry(access_flags, attributes/granularity)
     // null descriptor has all fields set to 0 (null)
     default_gdt.null = CreateGDTEntry(0x00, 0x00);
-    default_gdt.kernel_code = CreateGDTEntry(0x9b, 0x20);
-    default_gdt.kernel_data = CreateGDTEntry(0x92, 0x00);
-    default_gdt.user_code = CreateGDTEntry(0xfb, 0x20);
-    default_gdt.user_data = CreateGDTEntry(0xf2, 0x00);
+    default_gdt.kernelCode = CreateGDTEntry(0x9b, 0x20);
+    default_gdt.kernelData = CreateGDTEntry(0x92, 0x00);
+    default_gdt.userCode = CreateGDTEntry(0xfb, 0x20);
+    default_gdt.userData = CreateGDTEntry(0xf2, 0x00);
 
     // reload gdt address in gdtr
     LoadGDTR();

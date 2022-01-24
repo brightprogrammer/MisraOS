@@ -61,28 +61,30 @@ struct PhysicalMemoryManager{
     PhysicalMemoryManager();
 
     // print memory statistics
-    void ShowStatistics();
+    static void ShowStatistics();
 
     // getters
-    uint64_t GetFreeMemory();
-    uint64_t GetUsedMemory();
-    uint64_t GetReservedMemory();
-    uint64_t GetTotalMemory();
+    static uint64_t GetFreeMemory();
+    static uint64_t GetUsedMemory();
+    static uint64_t GetReservedMemory();
+    static uint64_t GetTotalMemory();
 
     // allocate a single page
-    [[nodiscard]] uint64_t AllocatePage();
+    // NOTE : Allocate page will always return PhysicalAddress + 0xffff800000000000
+    [[nodiscard]] static uint64_t AllocatePage();
 
     // allocate multiple pages at once
     // each entry in the returned array corresponds to a new page
     // max size is 512 pages at a time or 2MB
-    [[nodiscard]] uint64_t* AllocatePages(size_t n);
+    // NOTE : return addresses with higher half offset (same as allocate page - singular)
+    [[nodiscard]] static uint64_t* AllocatePages(size_t n);
 
     // free a single page
-    void FreePage(uint64_t page);
+    static void FreePage(uint64_t page);
 
     // free multiple pages at a time
     // max size limit is 512 or 2MB
-    void FreePages(uint64_t* pages, size_t n);
+    static void FreePages(uint64_t* pages, size_t n);
 private:
     // check of PMM is already initialized or not
     static inline bool isInitialized = false;
