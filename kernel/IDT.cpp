@@ -33,7 +33,6 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "IDT.hpp"
 
 static idt_pointer_t idt_pointer;
