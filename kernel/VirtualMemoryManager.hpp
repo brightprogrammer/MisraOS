@@ -43,30 +43,33 @@
 #define HIGHER_HALF_MEM_VIRT_OFFSET 0xffff800000000000
 #define KERNEL_VIRT_BASE 0xffffffff80000000
 
+enum PageFlags {
+    MAP_PRESENT = 1 << 0,
+    MAP_READ_WRITE = 1 << 1,
+    MAP_SUPERVISOR_ONLY = 1 << 2,
+    MAP_WRITE_THROUGH = 1 << 3,
+    MAP_CACHE_DISABLED = 1 << 4,
+    MAP_ACCESSED = 1 << 5,
+    MAP_LARGER_PAGES =  1 << 7,
+    MAP_CUSTOM0 = 1 << 9,
+    MAP_CUSTOM1 = 1 << 10,
+    MAP_CUSTOM2 = 1 << 11,
+    MAP_NO_EXECUTE = uint64_t(1) << 63 // only if supported
+};
+
 // page and page directory pointer use the same structure
 struct Page {
-    // is the page directory that this entry is pointing to present?
-    bool present : 1;
-    // is the page in question is read only or read/write?
-    bool readWrite : 1;
-    // is me memory accessible to supervisor only or to user also
-    bool supervisorOnly : 1;
-    bool writeThrough : 1;
-    // do you want this page to be cached?
-    bool cacheDisable : 1;
-    // set by cpu when this page is accessed
-    bool accessed : 1;
-    bool reserved0 : 1;
-    // on allocation of more than one pages at a time
-    // an array is returned with address of allocated pages in it
-    // if largerPages is set then that array will be treated as a large
-    // page which is made by combining all those pages
-    // this large page will be max to max 2MB in size
-    bool largerPages : 1;
-    bool reserved2 : 1;
-    uint8_t available : 3;
-    // address of page
-    uint64_t address : 52;
+    uint64_t value;
+    // set given flags to true
+    void SetFlags(uint64_t flags);
+    // set given flags to false
+    void UnsetFlags(uint64_t flags);
+    // if given flags are true then true is returned
+    bool GetFlags(uint64_t flags);
+    // set physical address
+    void SetAddress(uint64_t address);
+    // get physical address (4kb aligned always)
+    uint64_t GetAddress();
 };
 
 
@@ -82,7 +85,8 @@ struct VirtualMemoryManager{
     VirtualMemoryManager();
 
     // map physical address to given virtual address
-    void MapMemory(uint64_t virtualAddress, uint64_t physicalAddress);
+    // after physical and virtual address, you pass flags
+    void MapMemory(uint64_t virtualAddress, uint64_t physicalAddress, uint64_t flags);
 
     // create page mapping
     void CreatePageMap();

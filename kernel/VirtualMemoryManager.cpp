@@ -40,27 +40,34 @@
 #include "Printf.hpp"
 #include "Bootloader/BootInfo.hpp"
 
-// A page map level 4 (PML4) contains 512 page directory pointer tables (PDP Tables)
-// A PDP table is an array of 512 page ditectories (PDs)
-// A PD contains 512 page tables (PTs)
-// A PT contains 512 pages
-//
-// so the level of heirarchy is :
-// 4 - PageMapLevel4
-// 3 - PageDirectoryPointers
-// 2 - PageDirectorys
-// 1 - PageTables
-// 0 - Pages
-//
-// each level is basically an array of uint64_t
-// each uint64_t element in that array is address of a page
-// each page can contain 512 uint64_t values
-// so each level has 512 entries for a lower level
-// each of this 512 entries represent a page and hence described by page table entry
-// and a page table is just a collection of this 512 page table entries
-// this means that each level is actually a page table and each entry in the table
-// is a page table entry that stores address of lower level's page table
+#define PAGE_PHYSICAL_ADDRESS_MASK 0x000ffffffffff000
 
+// turn on given flags
+void Page::SetFlags(uint64_t flags){
+    value |= flags;
+}
+
+// turn off given flags
+void Page::UnsetFlags(uint64_t flags){
+    value &= (~flags | PAGE_PHYSICAL_ADDRESS_MASK);
+}
+
+// get state of given flags
+bool Page::GetFlags(uint64_t flags){
+    return (value & flags) > 0 ? true : false;
+}
+
+// get address of this mapped page
+uint64_t Page::GetAddress(){
+    // physical address is 40 bits only
+    return (value & PAGE_PHYSICAL_ADDRESS_MASK) >> 12;
+}
+
+// set address of this page
+void Page::SetAddress(uint64_t address){
+    value &= 0xfff0000000000fff;
+    value |= (address << 12) & PAGE_PHYSICAL_ADDRESS_MASK;
+}
 
 VirtualMemoryManager::VirtualMemoryManager(){
     // // map first 4GB of memory
@@ -85,7 +92,7 @@ VirtualMemoryManager::VirtualMemoryManager(){
             for (uintptr_t p = 0; p < region.length; p += PAGE_SIZE){
                 uint64_t vaddr = KERNEL_VIRT_BASE + p;
                 uint64_t paddr = region.base + p;
-                MapMemory(vaddr, paddr);
+                MapMemory(vaddr, paddr, MAP_PRESENT | MAP_READ_WRITE);
             }
         }
 
@@ -94,14 +101,14 @@ VirtualMemoryManager::VirtualMemoryManager(){
             for (uintptr_t p = 0; p < region.length; p += PAGE_SIZE){
                 uint64_t vaddr = HIGHER_HALF_MEM_VIRT_OFFSET + region.base + p;
                 uint64_t paddr =  region.base + p;
-                MapMemory(vaddr, paddr);
+                MapMemory(vaddr, paddr, MAP_PRESENT | MAP_READ_WRITE);
             }
         }
 
         // map other memories
         else {
             for (uintptr_t p = 0; p < region.length; p += PAGE_SIZE)
-                MapMemory(p, p);
+                MapMemory(p, p, MAP_PRESENT | MAP_READ_WRITE);
         }
     }
 
@@ -121,7 +128,7 @@ PageTable* VirtualMemoryManager::GetNextLevel(PageTable* pageTable, uint64_t ent
     PageTable* pageDirectoryPointer = nullptr;
 
     // if page directory entry is not present and allocation is allowed, then allocate it
-    if(!pageDirectoryEntry->present){
+    if(!pageDirectoryEntry->GetFlags(MAP_PRESENT)){
         // if allocation isn't allowed then return nullptr
         if(!allocate){
             return nullptr;
@@ -132,27 +139,27 @@ PageTable* VirtualMemoryManager::GetNextLevel(PageTable* pageTable, uint64_t ent
         memset(reinterpret_cast<void*>(pageDirectoryPointer), 0, PAGE_SIZE);
 
         // shift by 12 bits to align it to 0x1000 boundary
-        pageDirectoryEntry->address = reinterpret_cast<uint64_t>(pageDirectoryPointer) >> 12;
-        pageDirectoryEntry->present = true;
-        pageDirectoryEntry->readWrite = true;
+        pageDirectoryEntry->SetAddress(reinterpret_cast<uint64_t>(pageDirectoryPointer) >> 12);
+        pageDirectoryEntry->SetFlags(MAP_PRESENT | MAP_READ_WRITE);
     }else{
-        pageDirectoryPointer = reinterpret_cast<PageTable*>(pageDirectoryEntry->address << 12);
+        pageDirectoryPointer = reinterpret_cast<PageTable*>(pageDirectoryEntry->GetAddress() << 12);
     }
 
     return pageDirectoryPointer;
 }
 
-void VirtualMemoryManager::MapMemory(uint64_t virtualAddress, uint64_t physicalAddress){
+// map givne physical memory to virtual memory wiht given flags
+void VirtualMemoryManager::MapMemory(uint64_t virtualAddress, uint64_t physicalAddress, uint64_t flags){
     // get page table entry
     Page* pte = GetPage(virtualAddress, true);
     if(pte == nullptr) return;
 
     // map phyisical address 4kb aligned
-    pte->address = (physicalAddress >> 12);
-    pte->present = true;
-    pte->readWrite = true;
+    pte->SetAddress(physicalAddress >> 12);
+    pte->SetFlags(flags);
 }
 
+// this will create the root node of the page map tree
 void VirtualMemoryManager::CreatePageMap(){
     if(pml4 == nullptr){
         // create new page map
