@@ -1,5 +1,18 @@
 # README
 
+## Features
+- [x] Long Mode (64-bit) OS
+- [x] Higher Half Kernel
+- [x] Stack Based - Page Frame Allocator (PMM) with O(1) time complexity
+- [x] Virtual Memory Manager (VMM)
+- [x] Global Descriptor Table (GDT)
+- [x] Formatted Printing Support (`Printf(...)`)
+- [x] Fonts are rendered to a Framebuffer
+- [ ] Interrupt Descriptor Table
+- [ ] Keyboard Input
+- [ ] Heap
+More coming soon...
+
 ## Build Instructions
 To install build this kernel for the first time, take the following steps : 
 - Clone the repo
