@@ -8,7 +8,7 @@
 - [x] Global Descriptor Table (GDT)
 - [x] Formatted Printing Support (`Printf(...)`)
 - [x] Fonts are rendered to a Framebuffer
-- [ ] Interrupt Descriptor Table
+- [x] Interrupt Descriptor Table (25/01/22 1:28 AM Indian Standard Time)
 - [ ] Keyboard Input
 - [ ] Heap
 
