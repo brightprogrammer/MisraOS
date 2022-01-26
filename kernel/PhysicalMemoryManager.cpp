@@ -37,7 +37,7 @@
 #include "PhysicalMemoryManager.hpp"
 #include "Constants.hpp"
 #include "Printf.hpp"
-#include "String.hpp"
+#include "Utils/String.hpp"
 
 #include "Bootloader/BootInfo.hpp"
 #include "Bootloader/Util.hpp"
@@ -90,7 +90,7 @@ PhysicalMemoryManager::PhysicalMemoryManager(){
         Printf("[-] Insufficient memory to initialize PhysicalMemoryManager\n");
         Printf("\tLargest memory block size : %li KB\n", (largestMemBlock.size / KB));
         Printf("\tMemory required : %li KB\n", (numPagesUsedByStack * PAGE_SIZE / KB));
-        InfiniteHalt();
+        while(true)asm("hlt");
     }
 
     // set pages at the start of this memory region
@@ -145,7 +145,7 @@ uint64_t PhysicalMemoryManager::GetTotalMemory(){ return freeMemory + usedMemory
 uint64_t PhysicalMemoryManager::AllocatePage(){
     if(currentStackSize == 0){
         Printf("Out Of Memory!");
-        InfiniteHalt();
+        while(true)asm("hlt");
     }
 
     freeMemory -= PAGE_SIZE;

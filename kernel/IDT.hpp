@@ -42,14 +42,14 @@
 // | 7 | 6,5 | 4 | 3,2,1,0  |
 // | P | DPL | S | GateType |
 // p bit mist always be true if this gate is a valid gate!
-#define IDT_TYPE_ATTR_INTERRUPT_GATE 0b10001110
-#define IDT_TYPE_ATTR_CALL_GATE 0b10001100
-#define IDT_TYPE_ATTR_TRAP_GATE 0b10001111
+#define IDT_TYPE_ATTR_INTERRUPT_GATE uint8_t(0b10001110)
+#define IDT_TYPE_ATTR_CALL_GATE uint8_t(0b10001100)
+#define IDT_TYPE_ATTR_TRAP_GATE uint8_t(0b10001111)
 
 // idt entry structure
 // interrupt gate and trap gate have same structure
 // https://wiki.osdev.org/Interrupt_Descriptor_Table
-typedef struct {
+struct IDTEntry{
     uint16_t offsetLow;
     uint16_t selector; // switch to the "selected" gdt or ldt segment segment
     uint8_t ist;
@@ -73,13 +73,19 @@ typedef struct {
 
     void SetOffset(uint64_t offset);
     uint64_t GetOffset();
-} __attribute__((packed)) IDTEntry;
+} __attribute__((packed));
 
 // idtr register structure
-typedef struct {
+struct IDTR{
     uint16_t limit;
     uint64_t offset;
-} __attribute__((packed)) IDTR;
+} __attribute__((packed));
+
+// helper method to set an interrupt descriptor in IDT
+// entry must be the id of interrupt to be handled
+// isr must be pointer to function that will handle the interrupt
+// flags must be a valid flag to define the type of interrupt descriptor
+void SetInterruptDescriptor(uint8_t entry, void* isr, uint8_t flags);
 
 // you know what this does!
 void InstallIDT();

@@ -3,9 +3,10 @@
 
 
 # set sources
-set(KERNEL_SRCS "KernelEntry.cpp" "Renderer/Framebuffer.cpp" "Renderer/FontRenderer.cpp" "Renderer/Font.cpp" "String.cpp"
-    "GDT.cpp" "Utils/Bitmap.cpp" "Bootloader/Util.cpp" "IDT.cpp" "Interrupts.cpp"
-    "PhysicalMemoryManager.cpp" "VirtualMemoryManager.cpp" "Printf.cpp" "Bootloader/Entry.cpp" "Bootloader/BootInfo.cpp")
+set(KERNEL_SRCS "KernelEntry.cpp" "Renderer/Framebuffer.cpp" "Renderer/FontRenderer.cpp" "Renderer/Font.cpp"
+    "GDT.cpp" "Utils/Bitmap.cpp" "Bootloader/Util.cpp" "IDT.cpp" "Interrupts.cpp" "Utils/String.cpp"
+    "PhysicalMemoryManager.cpp" "VirtualMemoryManager.cpp" "Printf.cpp" "Bootloader/Entry.cpp" "Bootloader/BootInfo.cpp"
+    "Panic.cpp" "IO.cpp")
 
 # make kernel as executable
 add_executable(kernel ${KERNEL_SRCS})

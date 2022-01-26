@@ -1,5 +1,5 @@
  /**
- *@file IDT.hpp
+ *@file IDT.cpp
  *@author Siddharth Mishra (brightprogrammer)
  *@date 01/11/22
  *@copyright BSD 3-Clause License
@@ -63,22 +63,39 @@ uint64_t IDTEntry::GetOffset(){
     return offset;
 }
 
+// helper function to set interrupt descriptor
+void SetInterruptDescriptor(uint8_t entry, uint64_t isr, uint8_t flags){
+    IDTEntry* gatedesc = reinterpret_cast<IDTEntry*>(idtr.offset + entry * sizeof(IDTEntry));
+    gatedesc->SetOffset(isr);
+    gatedesc->typeAttr = flags;
+    gatedesc->selector = 0x08; // offset of kernelCode in GDT
+}
+
 void InstallIDT(){
     idtr.limit = PAGE_SIZE - 1;
+    // allocate page always returns virtual address
+    // and if paging is enabled then offset must be the virtual address
     idtr.offset = PhysicalMemoryManager::AllocatePage();
 
-    // create page fault handler
-    // note that we're actually allocating the interrupt gate here at 0xe offset
-    // 0xe offset is for page fault interrupt
-    IDTEntry* pageFaultInt = reinterpret_cast<IDTEntry*>(idtr.offset + 0x0e * sizeof(IDTEntry));
-    pageFaultInt->SetOffset(reinterpret_cast<uint64_t>(PageFaultHandler));
-  //  uint64_t off = pageFaultInt->GetOffset();
-    pageFaultInt->typeAttr = IDT_TYPE_ATTR_INTERRUPT_GATE;
-    pageFaultInt->selector = 0x08; // offset of kernelCode in GDT
+    // set all interrupts to go to default handler
+    for(uint8_t entry = 0; entry < 0x20; entry++){
+        SetInterruptDescriptor(entry, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    }
 
+    // create double fault handler
+    SetInterruptDescriptor(0x08, reinterpret_cast<uint64_t>(DoubleFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    // create general protection fault handler
+    SetInterruptDescriptor(0x0d, reinterpret_cast<uint64_t>(GeneralProtectionFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    // create page fault handler
+    SetInterruptDescriptor(0x0e, reinterpret_cast<uint64_t>(PageFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
+
+    // first interrupt is mapped to 0x20
+    // and keyboard interrupt is the second one
+    // so offset = 0x21
+    SetInterruptDescriptor(0x21, reinterpret_cast<uint64_t>(KeyboardInterruptHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
+
+    // load the idtr strucg in idtr register
     asm volatile ("lidt %0"
                   :
                   : "m"(idtr));
-
-//    while(true) asm("hlt");
 }

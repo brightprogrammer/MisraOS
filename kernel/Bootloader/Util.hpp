@@ -47,7 +47,4 @@
 // to ther kernel in the form of a linked list.
 void *StivaleGetTag(struct stivale2_struct *tagList, uint64_t id);
 
-// halt system indefinitely
-[[noreturn]] void InfiniteHalt();
-
 #endif // BOOTLOADER_UTIL_HPP

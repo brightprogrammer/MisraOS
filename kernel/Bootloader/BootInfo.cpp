@@ -44,7 +44,7 @@ BootInfo::BootInfo(stivale2_struct* stivaleTagList){
     stivale2_struct_tag_framebuffer *fb_tag = reinterpret_cast<stivale2_struct_tag_framebuffer*>(StivaleGetTag(stivaleTagList, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID));
     // stivale 2 spec states that bootloader will boot even if the framebuffer wasn't found!
     if (fb_tag == nullptr) {
-        InfiniteHalt();
+        while(true)asm("hlt");
     }
 
 

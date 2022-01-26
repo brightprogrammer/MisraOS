@@ -36,7 +36,7 @@
 
 #include "VirtualMemoryManager.hpp"
 #include "PhysicalMemoryManager.hpp"
-#include "String.hpp"
+#include "Utils/String.hpp"
 #include "Printf.hpp"
 
 #include "Bootloader/BootInfo.hpp"
@@ -77,6 +77,8 @@ VirtualMemoryManager::VirtualMemoryManager(){
     MemMapEntry* memmap = BootInfo::GetMemmap();
     uint64_t memmap_entries = BootInfo::GetMemmapCount();
 
+    // map first 4 gb of memory to higher half
+    // this memeory
     for(uint64_t p = 0; p < 4*GB; p += PAGE_SIZE){
         MapMemory(MEM_PHYS_OFFSET + p, p, MAP_PRESENT | MAP_READ_WRITE);
     }

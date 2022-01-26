@@ -37,14 +37,14 @@
 #include "Printf.hpp"
 
 #include "Renderer/FontRenderer.hpp"
-#include "String.hpp"
+#include "Utils/String.hpp"
 #include <cstdint>
 #include <cstdarg>
 #include <cwctype>
 
 static char kprintf_buff[0x400] = {0};
 
-__attribute__((format(printf, 1, 2))) int Printf(const char* fmtstr, ...){
+int PRINTF_API(1, 2) Printf(const char* fmtstr, ...){
     va_list vl;
     int i = 0, finalstrsz = 0;
     va_start(vl, fmtstr);
@@ -135,4 +135,23 @@ __attribute__((format(printf, 1, 2))) int Printf(const char* fmtstr, ...){
 
     va_end(vl);
     return finalstrsz;
+}
+
+int PRINTF_API(3, 4) ColorPrintf(uint32_t fgcolor, uint32_t bgcolor, const char* fmtstr, ...){
+    FontRenderer& r = GetDefaultFontRenderer();
+    const uint32_t oldfgcolor = r.foregroundColour;
+    const uint32_t oldbgcolor = r.backgroundColour;
+
+    r.backgroundColour = bgcolor;
+    r.foregroundColour = fgcolor;
+
+    va_list vl;
+    va_start(vl, fmtstr);
+    int res = Printf(fmtstr, vl);
+    va_end(vl);
+
+    r.backgroundColour = oldbgcolor;
+    r.foregroundColour = oldfgcolor;
+
+    return res;
 }

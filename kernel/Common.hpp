@@ -1,8 +1,8 @@
 /**
- *@file Framebuffer.hpp
+ *@file Common.hpp
  *@author Siddharth Mishra (brightprogrammer)
- *@date 01/08/2022
- *@brief Framebuffer handling class
+ *@date 01/26/2022
+ *@brief Contains common defines, functions, inculdes etc... needed by all files
  *@copyright BSD 3-Clause License
 
  Copyright (c) 2022, Siddharth Mishra
@@ -34,35 +34,16 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FRAMEBUFFER_HPP
-#define FRAMEBUFFER_HPP
+#ifndef COMMON_HPP
+#define COMMON_HPP
 
-#include <cstdint>
+// attribute for all printf type functions
+#define PRINTF_API(x, y) __attribute__((format(printf, x, y)))
 
-// basic framebuffer information
-// a framebuffer is where renderer draws things
-struct Framebuffer{
-    // default framebuffer constructor
-    // uses the framebuffer information provided in bootinfo
-    Framebuffer();
+// attribute of all interrupt handlers
+#define INTERRUPT_API __attribute__((interrupt))
 
-    // access a pixel in r-th row and c-th column
-    uint32_t& operator () (uint32_t r, uint32_t c);
+// attribute of all functions that will be called in a interrupt handler
+#define INTERRUPT_CALLEE_API __attribute__((no_caller_saved_registers))
 
-    // clear framebuffer with given color
-    // last clear color will be stored and
-    static void Clear(uint32_t clear);
-
-    // cached clear color
-    static inline uint32_t clearColor = 0x00000000;
-
-    // physical address of framebuffer
-    static inline uint32_t *address = nullptr;
-
-    // width and height of framebuffer
-    static inline uint64_t width = 0;
-    static inline uint64_t height = 0;
-    static inline uint64_t pitch = 0;
-};
-
-#endif // FRAMEBUFFER_HPP
+#endif // COMMON_HPP

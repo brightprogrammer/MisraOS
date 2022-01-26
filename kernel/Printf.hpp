@@ -37,7 +37,13 @@
 #ifndef PRINTF_HPP
 #define PRINTF_HPP
 
-__attribute__ ((format (printf, 1, 2))) __attribute__((no_caller_saved_registers))
-int Printf (const char* fmtstr, ...);
+#include <cstdint>
+#include "Common.hpp"
+
+// our printf function
+int PRINTF_API(1, 2) Printf (const char* fmtstr, ...);
+
+// coloured printf
+int PRINTF_API(3, 4) ColorPrintf(uint32_t fgcolor, uint32_t bgcolor, const char* fmtstr, ...);
 
 #endif // PRINTF_HPP

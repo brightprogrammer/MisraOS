@@ -58,7 +58,7 @@ enum PageFlags {
 
 // page and page directory pointer use the same structure
 struct Page {
-    uint64_t value;
+    uint64_t value; //
     // set given flags to true
     void SetFlags(uint64_t flags);
     // set given flags to false

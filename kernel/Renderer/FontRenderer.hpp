@@ -62,7 +62,6 @@ struct FontRenderer{
     // position of cursor
     uint32_t xpos = 0;
     uint32_t ypos = 0;
-
 private:
     // famebuffer to draw to
     Framebuffer framebuffer;

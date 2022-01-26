@@ -36,12 +36,14 @@
 
 #include "Renderer/Framebuffer.hpp"
 #include "Renderer/FontRenderer.hpp"
-#include "String.hpp"
-#include "GDT.hpp"
 #include "PhysicalMemoryManager.hpp"
 #include "VirtualMemoryManager.hpp"
+#include "Utils/String.hpp"
 #include "Printf.hpp"
 #include "IDT.hpp"
+#include "GDT.hpp"
+#include "Interrupts.hpp"
+#include "IO.hpp"
 
 // The following will be our kernel's entry point.
 void KernelEntry() {
@@ -70,7 +72,12 @@ void KernelEntry() {
     Printf("[+] Initializing Interrupt Descriptor Table\n");
     InstallIDT();
 
-    // create a page fault
-    Printf("[+] Creating an intentional #PAGE_FAULT\n");
-    asm volatile ("int $0x0e");
+    // remap pic
+    RemapPIC();
+    PortOutByte(PICMASTER_DATA, 0b11111101);
+    PortOutByte(PICSLAVE_DATA, 0b11111111);
+
+    asm("sti");
+
+    asm volatile("int $0x10");
 }

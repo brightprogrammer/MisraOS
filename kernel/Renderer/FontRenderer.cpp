@@ -35,7 +35,7 @@
 */
 
 #include "FontRenderer.hpp"
-#include "../String.hpp"
+#include "../Utils/String.hpp"
 
 // default font renderer
 static FontRenderer DefaultFontRenderer;

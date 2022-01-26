@@ -111,10 +111,3 @@ void *StivaleGetTag(struct stivale2_struct *stivale2_struct, uint64_t id) {
         current_tag = reinterpret_cast<stivale2_tag*>(current_tag->next);
     }
 }
-
-// this will halt the cpu indefinitely
-void InfiniteHalt(){
-    for(;;){
-        asm("hlt");
-    }
-}

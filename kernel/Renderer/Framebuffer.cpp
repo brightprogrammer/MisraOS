@@ -37,6 +37,7 @@
 
 #include "Framebuffer.hpp"
 #include "../Bootloader/BootInfo.hpp"
+#include "../Utils/String.hpp"
 
 // default constructor uses boot info
 Framebuffer::Framebuffer(){
@@ -49,4 +50,14 @@ Framebuffer::Framebuffer(){
 // define operator
 uint32_t& Framebuffer::operator()(uint32_t r, uint32_t c){
     return address[r * width + c];
+}
+
+// clear framebuffer with given color
+void Framebuffer::Clear(uint32_t color){
+    clearColor = color;
+    for(uint32_t r = 0; r < height; r++){
+        for(uint32_t c = 0 ; c < width; c++){
+            address[c + r*width]= color;
+        }
+    }
 }
