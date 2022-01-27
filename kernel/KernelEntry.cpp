@@ -79,5 +79,5 @@ void KernelEntry() {
 
     asm("sti");
 
-    asm volatile("int $0x10");
+    asm volatile("int $0x1d");
 }

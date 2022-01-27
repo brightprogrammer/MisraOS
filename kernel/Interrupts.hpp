@@ -56,20 +56,21 @@ struct InterruptFrame {
     uint64_t rip;
     uint16_t cs;
     uint64_t rflags;
+    uint64_t rsp;
+    uint16_t ss;
 } __attribute__((packed));
 
 // default exception handlers
-INTERRUPT_API void DefaultExceptionHandlerNoEror(InterruptFrame* frame);
-INTERRUPT_API void DefaultExceptionHandlerWithError(InterruptFrame* frame, uint64_t errcode);
 INTERRUPT_API void DefaultInterruptHandlerNoError(InterruptFrame* frame);
 INTERRUPT_API void DefaultInterruptHandlerWithError(InterruptFrame* frame, uint64_t errcode);
 
 // double fault = 0x08
-INTERRUPT_API void DoubleFaultHandler(InterruptFrame* frame);
+// the processor always pushes 0 as errorcode
+INTERRUPT_API void DoubleFaultHandler(InterruptFrame* frame, uint64_t errorcode);
 // general protection fault = 0x0d
-INTERRUPT_API void GeneralProtectionFaultHandler(InterruptFrame* frame);
+INTERRUPT_API void GeneralProtectionFaultHandler(InterruptFrame* frame, uint64_t errorcode);
 // page fault handler = 0x0e
-INTERRUPT_API void PageFaultHandler(InterruptFrame* frame);
+INTERRUPT_API void PageFaultHandler(InterruptFrame* frame, uint64_t errocode);
 // keyboard interrupt handler
 INTERRUPT_API void KeyboardInterruptHandler(InterruptFrame* frame);
 

@@ -40,50 +40,16 @@
 #include "Panic.hpp"
 #include "IO.hpp"
 
-// without errcode
-INTERRUPT_API void DefaultExceptionHandlerNoError(InterruptFrame* frame){
-    Panic("REACHED DEFAULT EXCEPTION HANDLER!\n");
-
-    // print information
-    Panic(//"\tSTACK SEGMENT (SS) : %x\n"
-          "\tCODE SEGMENT (CS) : %x\n"
-          "\tINSTRUCTION POINTER (RIP) : %lx\n"
-          "\tFLAGS REGISTER (RFLAGS) : %lx\n",
-  //        "\tSTACK POINTER (RSP) : %lx\n",
-          // frame->ss,
-          frame->cs, frame->rip, frame->rflags // frame->rsp
-        );
-}
-
-// with an errcode
-INTERRUPT_API void DefaultExceptionHandlerWithError(InterruptFrame* frame, uint64_t errcode){
-    Panic("REACHED DEFAULT EXCEPTION HANDLER!\n");
-
-    // print information
-    Panic(//"\tSTACK SEGMENT (SS) : %x\n"
-          "\tCODE SEGMENT (CS) : %x\n"
-          "\tINSTRUCTION POINTER (RIP) : %lx\n"
-          "\tFLAGS REGISTER (RFLAGS) : %lx\n"
-//          "\tSTACK POINTER (RSP) : %lx\n"
-          "\tERROR CODE : %lu\n",
-          // frame->ss,
-          frame->cs, frame->rip, frame->rflags, // frame->rflags,
-          errcode);
-}
 
 // without errcode
 INTERRUPT_API void DefaultInterruptHandlerNoError(InterruptFrame* frame){
     Panic("REACHED DEFAULT INTERRUPT HANDLER!\n");
 
     // print information
-    Panic(//"\tSTACK SEGMENT (SS) : %x\n"
-          "\tCODE SEGMENT (CS) : %x\n"
-          "\tINSTRUCTION POINTER (RIP) : %lx\n"
-          "\tFLAGS REGISTER (RFLAGS) : %lx\n",
-//          "\tSTACK POINTER (RSP) : %lx\n",
-          // frame->ss,
-          frame->cs, frame->rip, frame->rflags // frame->rsp
-        );
+    Panic("\tINSTRUCTION POINTER (RIP) : %lx\n"
+          "\tFLAGS REGISTER (RFLAGS) : %lx\n"
+          "\tCODE SEGMENT (CS) : %x\n",
+          frame->rip, frame->rflags, frame->cs);
 }
 
 // with an errcode
@@ -91,35 +57,59 @@ INTERRUPT_API void DefaultInterruptHandlerWithError(InterruptFrame* frame, uint6
     Panic("REACHED DEFAULT INTERRUPT HANDLER!\n");
 
     // print information
-    Panic(//"\tSTACK SEGMENT (SS) : %x\n"
-          "\tCODE SEGMENT (CS) : %x\n"
-          "\tINSTRUCTION POINTER (RIP) : %lx\n"
-          "\tFLAGS REGISTER (RFLAGS) : %lx\n"
-          //"\tSTACK POINTER (RSP) : %lx\n"
+    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+          "\tCODE SEGMENT (CS) : 0x%x\n"
+          "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
+          "\tSTACK POINTER (RSP) : 0x%lx\n"
+          "\tSTACK SEGMENT (SS) : 0x%x\n"
           "\tERROR CODE : %lu\n",
-          // frame->ss,
-          frame->cs, frame->rip, frame->rflags, // frame->rsp,
-          errcode);
+          frame->rip, frame->cs, frame->rflags, frame->rsp, frame->ss, errcode);
 }
 
 
 // 0x08
-INTERRUPT_API void DoubleFaultHandler(InterruptFrame* frame){
-    Panic("Caught #DOUBLE_FAULT, halting execution...\n");
+INTERRUPT_API void DoubleFaultHandler(InterruptFrame* frame, uint64_t errorcode){
+    Panic("Caught #DOUBLE_FAULT\n");
+
+    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+          "\tCODE SEGMENT (CS) : 0x%x\n"
+          "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
+          "\tSTACK POINTER (RSP) : 0x%lx\n"
+          "\tSTACK SEGMENT (SS) : 0x%x\n"
+          "\tERROR CODE : %lu\n",
+          frame->rip, frame->cs, frame->rflags, frame->rsp, frame->ss, errorcode);
 
     // double fault can't be recovered from
     while(true) asm("hlt");
 }
 
 // 0x0d
-INTERRUPT_API void GeneralProtectionFaultHandler(InterruptFrame* frame){
-    Panic("Caught #GENERAL_PROTECTION_FAULT, halting execution...\n");
+INTERRUPT_API void GeneralProtectionFaultHandler(InterruptFrame* frame, uint64_t errorcode){
+    Panic("Caught #GENERAL_PROTECTION_FAULT\n");
+
+    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+          "\tCODE SEGMENT (CS) : 0x%x\n"
+          "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
+          "\tSTACK POINTER (RSP) : 0x%lx\n"
+          "\tSTACK SEGMENT (SS) : 0x%x\n"
+          "\tERROR CODE : %lu\n",
+          frame->rip, frame->cs, frame->rflags, frame->rsp, frame->ss, errorcode);
+
     while(true) asm("hlt");
 }
 
 // 0x0e
-INTERRUPT_API void PageFaultHandler(InterruptFrame* frame){
-    Panic("Caught #PAGE_FAULT, halting execution...\n");
+INTERRUPT_API void PageFaultHandler(InterruptFrame* frame, uint64_t errorcode){
+    Panic("Caught #PAGE_FAULT\n");
+
+    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+          "\tCODE SEGMENT (CS) : 0x%x\n"
+          "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
+          "\tSTACK POINTER (RSP) : 0x%lx\n"
+          "\tSTACK SEGMENT (SS) : 0x%x\n"
+          "\tERROR CODE : %lu\n",
+          frame->rip, frame->cs, frame->rflags, frame->rsp, frame->ss, errorcode);
+
     while(true) asm("hlt");
 }
 

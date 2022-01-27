@@ -77,17 +77,41 @@ void InstallIDT(){
     // and if paging is enabled then offset must be the virtual address
     idtr.offset = PhysicalMemoryManager::AllocatePage();
 
-    // set all interrupts to go to default handler
-    for(uint8_t entry = 0; entry < 0x20; entry++){
-        SetInterruptDescriptor(entry, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    }
+
+    SetInterruptDescriptor(0x00, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x01, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x02, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x03, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x04, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x05, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x06, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x07, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
 
     // create double fault handler
     SetInterruptDescriptor(0x08, reinterpret_cast<uint64_t>(DoubleFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
+
+    SetInterruptDescriptor(0x09, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x0a, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x0b, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x0c, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+
     // create general protection fault handler
     SetInterruptDescriptor(0x0d, reinterpret_cast<uint64_t>(GeneralProtectionFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
     // create page fault handler
     SetInterruptDescriptor(0x0e, reinterpret_cast<uint64_t>(PageFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
+
+    SetInterruptDescriptor(0x0f, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x10, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x11, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x12, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x13, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x14, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x15, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    // 0x16 - 0x1b is reserved
+    SetInterruptDescriptor(0x1c, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x1d, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    SetInterruptDescriptor(0x1e, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    // 0x1f is reserved
 
     // first interrupt is mapped to 0x20
     // and keyboard interrupt is the second one
