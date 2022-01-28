@@ -59,28 +59,66 @@ FontRenderer::FontRenderer(){
 }
 
 // draw string at position in fontRenderer
+static uint32_t lastLineSize = 0;
 void FontRenderer::DrawCharacter(char c){
-    uint8_t font_width = font.font_width;
-    uint8_t font_height = font.font_height;
+    uint8_t width = font.width;
+    uint8_t height = font.height;
 
     // get bitmap for required character
-    // NOTE : This assumes that width of font is 8 pixels
-    uint8_t* font_bitmap = font.bitmap.buffer + c * font_height;
+    uint8_t* font_bitmap = font.bitmap.buffer + c * height;
 
-    for(uint32_t i = 0; i < font_height; i++){
+    if(c == '\n'){
+        lastLineSize = xpos;
+        xpos = 0;
+        ypos += height;
+        return;
+    } else if(c == '\t'){
+        xpos += TAB_SIZE * width;
+        return;
+    } else if(c == '\b'){
+        if(xpos != 0){
+            xpos -= width;
+        }else{
+            xpos = lastLineSize;
+            if(ypos) ypos -= height;
+        }
+    }
+
+    // wrap text
+    if(xpos >= framebuffer.width){
+        lastLineSize = framebuffer.width;
+        xpos = 0;
+        ypos += font.height;
+    }
+
+    if(ypos >= framebuffer.height){
+        ypos = 0;
+        xpos = 0;
+    }
+
+    for(uint32_t i = 0; i < height; i++){
         uint8_t row_bitmap = font_bitmap[i];
-        for(uint32_t j = 0; j < font_width; j++){
+        for(uint32_t j = 0; j < width; j++){
             // calculate write address
             uint32_t write_addr = (xpos + j) + (ypos + i) * framebuffer.width;
 
-            // if bit is set then fill foreground colour else fill background colour
-            // 8 - j because of endianness of pc when compiling. Bits are stored in little endian format
-            if(row_bitmap & (1 << (8 - j))){
-                framebuffer.address[write_addr] = foregroundColour;
-            }else{
+            if(c == '\b'){
                 framebuffer.address[write_addr] = backgroundColour;
+            }else {
+                // if bit is set then fill foreground colour else fill background colour
+                // 8 - j because of endianness of pc when compiling. Bits are stored in little endian format
+                if(row_bitmap & (1 << (8 - j))){
+                    framebuffer.address[write_addr] = foregroundColour;
+                }else{
+                    framebuffer.address[write_addr] = backgroundColour;
+                }
             }
         }
+    }
+
+    if(c != '\b'){
+        // keep increasing position
+        xpos += font.width;
     }
 }
 
@@ -88,33 +126,8 @@ void FontRenderer::DrawCharacter(char c){
 void FontRenderer::DrawString(const char* str){
     uint32_t strsz = strlen(str);
     for(uint32_t i = 0; i < strsz; i++){
-        if(str[i] == '\n'){
-            xpos = 0;
-            ypos += font.font_height;
-            continue;
-        }
-
-        if(str[i] == '\t'){
-            xpos += TAB_SIZE * font.font_width;
-            continue;
-        }
-
-        // wrap text
-        if(xpos >= framebuffer.width){
-            xpos = 0;
-            ypos += font.font_height;
-        }
-
-        if(ypos >= framebuffer.height){
-            ypos = 0;
-            xpos = 0;
-        }
-
         // draw character
         DrawCharacter(str[i]);
-
-        // keep increasing position
-        xpos += font.font_width;
     }
 }
 

@@ -60,9 +60,9 @@ struct Framebuffer{
     static inline uint32_t *address = nullptr;
 
     // width and height of framebuffer
-    static inline uint64_t width = 0;
-    static inline uint64_t height = 0;
-    static inline uint64_t pitch = 0;
+    static inline uint32_t width = 0;
+    static inline uint32_t height = 0;
+    static inline uint32_t pitch = 0;
 };
 
 #endif // FRAMEBUFFER_HPP

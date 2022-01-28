@@ -1,8 +1,8 @@
 /**
- *@file IO.cpp
+ *@file Puts.hpp
  *@author Siddharth Mishra (brightprogrammer)
- *@date 01/26/2022
- *@brief Defines IO helper functions
+ *@date 01/28/2022
+ *@brief Declare simple puts function that prints every text to a new line
  *@copyright BSD 3-Clause License
 
  Copyright (c) 2022, Siddharth Mishra
@@ -34,26 +34,16 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "IO.hpp"
+#ifndef PUTS_HPP
+#define PUTS_HPP
 
-INTERRUPT_CALLEE_API void PortWriteByte(uint16_t port, uint8_t value){
-    asm volatile ("outb %0, %1"
-                  :
-                  : "a"(value), "Nd"(port));
-}
+#include <cstdint>
 
-INTERRUPT_CALLEE_API uint8_t PortReadByte(uint16_t port){
-    uint8_t ret;
-    asm volatile ("inb %1, %0"
-                  : "=a"(ret)
-                  : "Nd"(port));
+// puts doesn't add a new line here
+void Puts(const char* str);
+void ColorPuts(uint32_t fgcolor, uint32_t bgcolor, const char* str);
 
-    return ret;
-}
+void PutChar(char c);
+void ColorPutChar(char c);
 
-INTERRUPT_CALLEE_API void PortIOWait(){
-    // write something into an unused port so that
-    // other ports get time to catch up
-    // this will waste a single IO cycle
-    PortWriteByte(0x80, 0);
-}
+#endif // PUTS_HPP

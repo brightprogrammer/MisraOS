@@ -44,16 +44,13 @@
 #define FONT_WIDTH 8
 #define FONT_HEIGHT 16
 
-// return the statically defined font array
-Bitmap GetFontBitmap();
-
 // contains basic font related information
 struct Font{
     Font();
 
-    Bitmap bitmap;
-    uint8_t font_width;
-    uint8_t font_height;
+    static inline Bitmap bitmap;
+    static inline uint8_t width;
+    static inline uint8_t height;
 };
 
 #endif // FONT_HPP

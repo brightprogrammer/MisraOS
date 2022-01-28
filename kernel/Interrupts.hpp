@@ -41,6 +41,12 @@
 #define PICMASTER_DATA 0x21
 #define PICSLAVE_COMMAND 0xa0
 #define PICSLAVE_DATA 0xa1
+#define PIC_EOI 0x20
+
+// reference : https://www.eeeguide.com/8259-programmable-interrupt-controller/
+// ICWs are Initialization Command Words
+// They are given to PIC (Programmable Interrupt Controller) during initialization
+// ICW_1
 
 #define ICW1_INIT 0x10
 #define ICW1_ICW4 0x01

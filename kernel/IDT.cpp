@@ -77,41 +77,55 @@ void InstallIDT(){
     // and if paging is enabled then offset must be the virtual address
     idtr.offset = PhysicalMemoryManager::AllocatePage();
 
-
-    SetInterruptDescriptor(0x00, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x01, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x02, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x03, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x04, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x05, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x06, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x07, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    // divide by zero
+    SetInterruptDescriptor(0x00, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // debug
+    SetInterruptDescriptor(0x01, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // NMI
+    SetInterruptDescriptor(0x02, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // breakpoint
+    SetInterruptDescriptor(0x03, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // overflow
+    SetInterruptDescriptor(0x04, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // bound range exceeded
+    SetInterruptDescriptor(0x05, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // invalid opcode
+    SetInterruptDescriptor(0x06, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // device not avaiable
+    SetInterruptDescriptor(0x07, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
 
     // create double fault handler
     SetInterruptDescriptor(0x08, reinterpret_cast<uint64_t>(DoubleFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
 
-    SetInterruptDescriptor(0x09, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x0a, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x0b, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x0c, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
+    // co-processor segment overrun
+    SetInterruptDescriptor(0x09, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_TRAP_GATE);
+    // invalid tss
+    SetInterruptDescriptor(0x0a, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_TRAP_GATE);
+    // segment not present
+    SetInterruptDescriptor(0x0b, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_TRAP_GATE);
+    // stack segment fault
+    SetInterruptDescriptor(0x0c, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_TRAP_GATE);
 
     // create general protection fault handler
     SetInterruptDescriptor(0x0d, reinterpret_cast<uint64_t>(GeneralProtectionFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
     // create page fault handler
     SetInterruptDescriptor(0x0e, reinterpret_cast<uint64_t>(PageFaultHandler), IDT_TYPE_ATTR_INTERRUPT_GATE);
 
-    SetInterruptDescriptor(0x0f, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x10, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x11, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x12, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x13, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x14, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x15, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    // 0x16 - 0x1b is reserved
-    SetInterruptDescriptor(0x1c, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x1d, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    SetInterruptDescriptor(0x1e, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_INTERRUPT_GATE);
-    // 0x1f is reserved
+    // 0x0f is reserved
+
+    // floating point error
+    SetInterruptDescriptor(0x10, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // alignment cehck
+    SetInterruptDescriptor(0x11, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_TRAP_GATE);
+    // machine check
+    SetInterruptDescriptor(0x12, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // simd floating point exception
+    SetInterruptDescriptor(0x13, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // virtualization exception
+    SetInterruptDescriptor(0x14, reinterpret_cast<uint64_t>(DefaultInterruptHandlerNoError), IDT_TYPE_ATTR_TRAP_GATE);
+    // control protection exception
+    SetInterruptDescriptor(0x15, reinterpret_cast<uint64_t>(DefaultInterruptHandlerWithError), IDT_TYPE_ATTR_TRAP_GATE);
+    // rest up until 0x1f is reserved
 
     // first interrupt is mapped to 0x20
     // and keyboard interrupt is the second one

@@ -60,5 +60,7 @@ extern "C" [[noreturn]] void Entry(stivale2_struct* tagList){
     KernelEntry();
 
     // hang if the kernel returns
-    while(true)asm("hlt");
+    while(true){
+        asm volatile("hlt");
+    }
 }

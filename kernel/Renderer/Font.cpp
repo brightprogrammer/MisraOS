@@ -297,13 +297,8 @@ static uint8_t font_bitmap_array[4096] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-// return the static array
-Bitmap GetFontBitmap(){
-    return Bitmap(sizeof(font_bitmap_array), font_bitmap_array);
-}
-
 Font::Font(){
-    bitmap = GetFontBitmap();
-    font_width  = FONT_WIDTH;
-    font_height = FONT_HEIGHT;
+    bitmap = Bitmap(sizeof(font_bitmap_array), font_bitmap_array);
+    width  = FONT_WIDTH;
+    height = FONT_HEIGHT;
 }

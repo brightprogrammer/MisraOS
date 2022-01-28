@@ -1,8 +1,8 @@
 /**
- *@file IO.cpp
+ *@file Keyboard.hpp
  *@author Siddharth Mishra (brightprogrammer)
- *@date 01/26/2022
- *@brief Defines IO helper functions
+ *@date 01/28/2022
+ *@brief declaration of keyboard helper class
  *@copyright BSD 3-Clause License
 
  Copyright (c) 2022, Siddharth Mishra
@@ -34,26 +34,13 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "IO.hpp"
+#ifndef KEYBOARD_HPP
+#define KEYBOARD_HPP
 
-INTERRUPT_CALLEE_API void PortWriteByte(uint16_t port, uint8_t value){
-    asm volatile ("outb %0, %1"
-                  :
-                  : "a"(value), "Nd"(port));
-}
+#include "Common.hpp"
+#include <cstdint>
 
-INTERRUPT_CALLEE_API uint8_t PortReadByte(uint16_t port){
-    uint8_t ret;
-    asm volatile ("inb %1, %0"
-                  : "=a"(ret)
-                  : "Nd"(port));
+// handle keyboard event
+void INTERRUPT_CALLEE_API HandleKeyboardEvent(uint8_t scancode);
 
-    return ret;
-}
-
-INTERRUPT_CALLEE_API void PortIOWait(){
-    // write something into an unused port so that
-    // other ports get time to catch up
-    // this will waste a single IO cycle
-    PortWriteByte(0x80, 0);
-}
+#endif // KEYBOARD_HPP

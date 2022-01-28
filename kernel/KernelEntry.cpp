@@ -46,6 +46,9 @@
 #include "IO.hpp"
 
 // The following will be our kernel's entry point.
+// This function is called by Entry function in Entry.cpp in kernel/Bootloader
+// The Entry function initializes some necessary things required by kernel
+// You might want to see that function if you are reading this for the first time
 void KernelEntry() {
     // draw this string onto the screen
     Printf("Misra OS | Copyright Siddharth Mishra (c) 2022 | BSD 3-Clause License\n");
@@ -74,10 +77,4 @@ void KernelEntry() {
 
     // remap pic
     RemapPIC();
-    PortOutByte(PICMASTER_DATA, 0b11111101);
-    PortOutByte(PICSLAVE_DATA, 0b11111111);
-
-    asm("sti");
-
-    asm volatile("int $0x1d");
 }

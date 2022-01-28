@@ -2,13 +2,18 @@
 #define PANIC_HPP
 
 #include "Common.hpp"
+#include "Renderer/Colors.hpp"
 
-// panic function
-// if panicscreen is true then panic message will be printed on
-// a crated panic screen with full red background and panic message at the top
-//
+// colors used when printing panic message
+#define PANIC_FGCOLOR COLOR_BLACK
+#define PANIC_BGCOLOR COLOR_RED
+
+
 // NOTE that after calling this function, caller registers wont be set back to nromal state
 // so panic must only be called in absolute panic state
-void PRINTF_API(1, 2) INTERRUPT_CALLEE_API Panic(const char* fmtstr, ...);
+void PRINTF_API(1, 2) INTERRUPT_CALLEE_API PanicPrintf(const char* fmtstr, ...);
+
+// panic puts
+void INTERRUPT_CALLEE_API PanicPuts(const char* str);
 
 #endif // PANIC_HPP

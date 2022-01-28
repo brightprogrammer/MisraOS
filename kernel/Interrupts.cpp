@@ -37,27 +37,28 @@
 #include <cstdint>
 
 #include "Interrupts.hpp"
+#include "Keyboard.hpp"
 #include "Panic.hpp"
 #include "IO.hpp"
 
 
 // without errcode
 INTERRUPT_API void DefaultInterruptHandlerNoError(InterruptFrame* frame){
-    Panic("REACHED DEFAULT INTERRUPT HANDLER!\n");
+    PanicPrintf("REACHED DEFAULT INTERRUPT HANDLER!\n");
 
     // print information
-    Panic("\tINSTRUCTION POINTER (RIP) : %lx\n"
-          "\tFLAGS REGISTER (RFLAGS) : %lx\n"
-          "\tCODE SEGMENT (CS) : %x\n",
+    PanicPrintf("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+          "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
+          "\tCODE SEGMENT (CS) : 0x%x\n",
           frame->rip, frame->rflags, frame->cs);
 }
 
 // with an errcode
 INTERRUPT_API void DefaultInterruptHandlerWithError(InterruptFrame* frame, uint64_t errcode){
-    Panic("REACHED DEFAULT INTERRUPT HANDLER!\n");
+    PanicPrintf("REACHED DEFAULT INTERRUPT HANDLER!\n");
 
     // print information
-    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+    PanicPrintf("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
           "\tCODE SEGMENT (CS) : 0x%x\n"
           "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
           "\tSTACK POINTER (RSP) : 0x%lx\n"
@@ -66,12 +67,11 @@ INTERRUPT_API void DefaultInterruptHandlerWithError(InterruptFrame* frame, uint6
           frame->rip, frame->cs, frame->rflags, frame->rsp, frame->ss, errcode);
 }
 
-
 // 0x08
 INTERRUPT_API void DoubleFaultHandler(InterruptFrame* frame, uint64_t errorcode){
-    Panic("Caught #DOUBLE_FAULT\n");
+    PanicPrintf("Caught #DOUBLE_FAULT\n");
 
-    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+    PanicPrintf("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
           "\tCODE SEGMENT (CS) : 0x%x\n"
           "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
           "\tSTACK POINTER (RSP) : 0x%lx\n"
@@ -85,9 +85,9 @@ INTERRUPT_API void DoubleFaultHandler(InterruptFrame* frame, uint64_t errorcode)
 
 // 0x0d
 INTERRUPT_API void GeneralProtectionFaultHandler(InterruptFrame* frame, uint64_t errorcode){
-    Panic("Caught #GENERAL_PROTECTION_FAULT\n");
+    PanicPrintf("Caught #GENERAL_PROTECTION_FAULT\n");
 
-    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+    PanicPrintf("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
           "\tCODE SEGMENT (CS) : 0x%x\n"
           "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
           "\tSTACK POINTER (RSP) : 0x%lx\n"
@@ -100,9 +100,9 @@ INTERRUPT_API void GeneralProtectionFaultHandler(InterruptFrame* frame, uint64_t
 
 // 0x0e
 INTERRUPT_API void PageFaultHandler(InterruptFrame* frame, uint64_t errorcode){
-    Panic("Caught #PAGE_FAULT\n");
+    PanicPrintf("Caught #PAGE_FAULT\n");
 
-    Panic("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
+    PanicPrintf("\tINSTRUCTION POINTER (RIP) : 0x%lx\n"
           "\tCODE SEGMENT (CS) : 0x%x\n"
           "\tFLAGS REGISTER (RFLAGS) : 0x%lx\n"
           "\tSTACK POINTER (RSP) : 0x%lx\n"
@@ -113,47 +113,63 @@ INTERRUPT_API void PageFaultHandler(InterruptFrame* frame, uint64_t errorcode){
     while(true) asm("hlt");
 }
 
+INTERRUPT_CALLEE_API void EndMasterPIC(){
+    PortWriteByte(PICMASTER_COMMAND, PIC_EOI);
+}
+
+INTERRUPT_CALLEE_API void EndSlavePIC(){
+    PortWriteByte(PICMASTER_COMMAND, PIC_EOI);
+    PortWriteByte(PICSLAVE_COMMAND, PIC_EOI);
+}
+
 INTERRUPT_API void KeyboardInterruptHandler(InterruptFrame* frame){
     // 0x60 is the port at which ps2 keyboard is located
-    uint8_t scancode = PortInByte(0x60);
-
+    uint8_t scancode = PortReadByte(0x60);
+    HandleKeyboardEvent(scancode);
+    EndMasterPIC();
 }
 
 // remap pic
 void RemapPIC(){
     uint8_t bitmask_master, bitmask_slave;
 
-    bitmask_master = PortInByte(PICMASTER_DATA);
+    bitmask_master = PortReadByte(PICMASTER_DATA);
     PortIOWait();
-    bitmask_slave = PortInByte(PICSLAVE_DATA);
+    bitmask_slave = PortReadByte(PICSLAVE_DATA);
     PortIOWait();
 
-    PortOutByte(PICMASTER_COMMAND, ICW1_INIT | ICW1_ICW4);
+    PortWriteByte(PICMASTER_COMMAND, ICW1_INIT | ICW1_ICW4);
     PortIOWait();
-    PortOutByte(PICSLAVE_COMMAND, ICW1_INIT | ICW1_ICW4);
+    PortWriteByte(PICSLAVE_COMMAND, ICW1_INIT | ICW1_ICW4);
     PortIOWait();
 
     // map at 0x20 and 0x28 offsets in IDT
     // descriptors at these offsets will be used in IDT
     // whenever there's a PIC interrupt
-    PortOutByte(PICMASTER_DATA, 0x20);
+    PortWriteByte(PICMASTER_DATA, 0x20);
     PortIOWait();
-    PortOutByte(PICSLAVE_DATA, 0x28);
+    PortWriteByte(PICSLAVE_DATA, 0x28);
     PortIOWait();
 
     // tell pic chips about their existence
-    PortOutByte(PICMASTER_DATA, 4);
+    PortWriteByte(PICMASTER_DATA, 0b00000100);
     PortIOWait();
-    PortOutByte(PICSLAVE_DATA, 2);
+    PortWriteByte(PICSLAVE_DATA, 0b00000010);
     PortIOWait();
 
     // tell them to operate in 8086 mode now
-    PortOutByte(PICMASTER_DATA, ICW4_8086);
+    PortWriteByte(PICMASTER_DATA, ICW4_8086);
     PortIOWait();
-    PortOutByte(PICSLAVE_DATA, ICW4_8086);
+    PortWriteByte(PICSLAVE_DATA, ICW4_8086);
     PortIOWait();
 
-    PortOutByte(PICMASTER_DATA, bitmask_master);
+    PortWriteByte(PICMASTER_DATA, bitmask_master);
     PortIOWait();
-    PortOutByte(PICSLAVE_DATA, bitmask_slave);
+    PortWriteByte(PICSLAVE_DATA, bitmask_slave);
+
+    PortWriteByte(PICMASTER_DATA, 0b11111101);
+    PortWriteByte(PICSLAVE_DATA, 0b11111111);
+
+    // sets the interrupt flag in rflags/eflags register
+    asm volatile ("sti");
 }
