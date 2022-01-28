@@ -9,8 +9,10 @@
 - [x] Formatted Printing Support (`Printf(...)`)
 - [x] Fonts are rendered to a Framebuffer
 - [x] Interrupt Descriptor Table (25/01/22 1:28 AM Indian Standard Time)
-- [ ] Keyboard Input
+- [x] Keyboard Input (28/01/22 10:40 PM Indian Standard Time)
 - [ ] Heap
+- [ ] Threading
+- [ ] File System
 
 More coming soon...
 
