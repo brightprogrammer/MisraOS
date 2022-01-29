@@ -66,7 +66,20 @@ int64_t strcmp(const char* s1, const char* s2);
 char *strcpy(char *dst, const char *src);
 // concatenate src to dst's right side
 char *strcat(char *dst, const char *src);
+
 // check if given char is digit or not
 bool isdigit(char c);
+// check if given character is in upper case or not
+bool isupper(char c);
+// check if given char is in lower case or not
+bool islower(char c);
+// convert to upper case
+char toupper(char c);
+// convert to lower case
+char tolower(char c);
+// check if given char is alphabet
+bool isalpha(char c);
+// check if givne char is alphabet or number
+bool isalphanum(char c);
 
 #endif // STRING_HPP

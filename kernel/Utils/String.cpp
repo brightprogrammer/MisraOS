@@ -258,6 +258,56 @@ char* strcat(char* dst, const char* src){
     return dst;
 }
 
+// check if number (digit)
 bool isdigit(char c){
-    return ('0' <= c) && (c <= '9');
+    return (c >= '0') && (c <= '9');
+}
+
+// check if uppercase
+bool isupper(char c){
+    if(c >= 'A' && c <= 'Z'){
+        return true;
+    }
+
+    return false;
+}
+
+// check if lowercase
+bool islower(char c){
+    if(c >= 'a' && c <= 'z'){
+        return true;
+    }
+
+    return false;
+}
+
+// convert to uppercase
+char toupper(char c){
+    if(!isalpha(c)) return c;
+
+    if(isupper(c)) return c;
+    else{
+        return 'A' + (c - 'a');
+    }
+}
+
+// convert to lowercase
+char tolower(char c){
+    if(!isalpha(c)) return c;
+
+    if(islower(c)) return c;
+    else{
+        return 'a' + (c - 'A');
+    }
+}
+
+// check if alphabet
+bool isalpha(char c){
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+
+// check if alphabet or number
+bool isalphanum(char c){
+    return isalpha(c) || isdigit(c);
 }
