@@ -9,3 +9,4 @@ misra.hdd
 build/
 sys_root/
 disk_root/
+limine/
