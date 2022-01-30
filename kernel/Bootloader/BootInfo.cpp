@@ -41,7 +41,7 @@ static BootInfo bootInfo = {};
 
 BootInfo::BootInfo(stivale2_struct* stivaleTagList){
     // get framebuffer tag
-    stivale2_struct_tag_framebuffer *fb_tag = reinterpret_cast<stivale2_struct_tag_framebuffer*>(StivaleGetTag(stivaleTagList, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID));
+    stivale2_struct_tag_framebuffer *fb_tag = reinterpret_cast<stivale2_struct_tag_framebuffer*>(GetStivaleTag(stivaleTagList, STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID));
     // stivale 2 spec states that bootloader will boot even if the framebuffer wasn't found!
     if (fb_tag == nullptr) {
         while(true)asm("hlt");
@@ -55,12 +55,15 @@ BootInfo::BootInfo(stivale2_struct* stivaleTagList){
     fbPitch = fb_tag->framebuffer_pitch;
 
     // get kernel related information
-    stivale2_struct_tag_kernel_base_address *kaddr_tag = reinterpret_cast<stivale2_struct_tag_kernel_base_address*>(StivaleGetTag(stivaleTagList, STIVALE2_STRUCT_TAG_KERNEL_BASE_ADDRESS_ID));
+    stivale2_struct_tag_kernel_base_address *kaddr_tag = reinterpret_cast<stivale2_struct_tag_kernel_base_address*>(GetStivaleTag(stivaleTagList, STIVALE2_STRUCT_TAG_KERNEL_BASE_ADDRESS_ID));
     krnlPhysAddr = kaddr_tag->physical_base_address;
     krnlVirtAddr = kaddr_tag->virtual_base_address;
 
     // get memmap tag
-    memmap_tag = reinterpret_cast<stivale2_struct_tag_memmap*>(StivaleGetTag(stivaleTagList, STIVALE2_STRUCT_TAG_MEMMAP_ID));
+    memmap_tag = reinterpret_cast<stivale2_struct_tag_memmap*>(GetStivaleTag(stivaleTagList, STIVALE2_STRUCT_TAG_MEMMAP_ID));
+
+    // get rsdp
+    rsdp_addr = reinterpret_cast<stivale2_struct_tag_rsdp*>(GetStivaleTag(stivaleTagList, STIVALE2_STRUCT_TAG_RSDP_ID))->rsdp;
 }
 
 uint64_t BootInfo::GetFramebufferAddress(){ return fbAddr; }
@@ -73,3 +76,5 @@ uint64_t BootInfo::GetKernelVirtualBase(){ return krnlVirtAddr; }
 
 uint64_t BootInfo::GetMemmapCount(){ return memmap_tag->entries; }
 MemMapEntry* BootInfo::GetMemmap(){ return memmap_tag->memmap; }
+
+uint64_t BootInfo::GetRSDPAddress(){ return rsdp_addr; }

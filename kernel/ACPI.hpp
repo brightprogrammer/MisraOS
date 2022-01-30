@@ -1,8 +1,8 @@
 /**
- *@file Common.hpp
+ *@file ACPI.hpp
  *@author Siddharth Mishra (brightprogrammer)
- *@date 01/26/2022
- *@brief Contains common defines, functions, inculdes etc... needed by all files
+ *@date 01/30/2022
+ *@brief Declares ACPI structs
  *@copyright BSD 3-Clause License
 
  Copyright (c) 2022, Siddharth Mishra
@@ -34,22 +34,64 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#ifndef RSDP_HPP
+#define RSDP_HPP
 
-// attribute for all printf type functions
-#define PRINTF_API(x, y) __attribute__((format(printf, x, y)))
+#include "Common.hpp"
+#include <cstdint>
 
-// attribute of all interrupt handlers
-#define INTERRUPT_API __attribute__((interrupt))
+// information about root system description pointer
+struct RSDPDescriptorV1 {
+    char signature[8];
+    uint8_t checksum;
+    char oemID[6];
+    uint8_t revision;
+    uint32_t rsdtAddress;
+} PACKED_STRUCT;
 
-// attribute of all functions that will be called in a interrupt handler
-#define INTERRUPT_CALLEE_API __attribute__((no_caller_saved_registers))
+// new rsdp structure defined in uefi v2
+struct RSDPDescriptorV2 : public RSDPDescriptorV1{
+    uint32_t length;
+    uint64_t xsdtAddress;
+    uint8_t extendedChecksum;
+    uint8_t reserved[3];
+} PACKED_STRUCT;
 
-#define PACKED_STRUCT __attribute__((packed))
+// NOTE: RSDP checksums can be often wrong
+// we will just assume them to be true
+// also limine checks that for us before hand
+struct RSDPDescriptor{
+    RSDPDescriptor();
 
-inline void EternalHalt(){
-    while(true) asm("hlt");
-}
+    // rev == 1 for version 1
+    // rev > 1 for revion 2
+    uint8_t rev;
+    union {
+        RSDPDescriptorV1 v1;
+        RSDPDescriptorV2 v2;
+    };
 
-#endif // COMMON_HPP
+    bool ValidateChecksum();
+    uint64_t GetSDTAddress();
+};
+
+// all tables have same header
+// System Descriptor Table Header
+struct SDTHeader {
+    char signature[4];
+    uint32_t length;
+    uint8_t revision;
+    uint8_t checksum;
+    char oemID[6];
+    char oemTableID[8];
+    uint32_t oemRevision;
+    uint32_t creatorID;
+    uint32_t creatorRevision;
+} PACKED_STRUCT;
+
+// Memory-mapped Configuration Table Header
+struct MCFGHeader : public SDTHeader{
+    uint64_t reserved;
+} PACKED_STRUCT;
+
+#endif // RSDP_HPP

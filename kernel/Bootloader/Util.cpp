@@ -92,7 +92,7 @@ static struct stivale2_header stivale_hdr = {
 
 // We will now write a helper function which will allow us to scan for tags
 // that we want FROM the bootloader (structure tags).
-void *StivaleGetTag(struct stivale2_struct *stivale2_struct, uint64_t id) {
+void *GetStivaleTag(struct stivale2_struct *stivale2_struct, uint64_t id) {
     struct stivale2_tag *current_tag = reinterpret_cast<stivale2_tag*>(stivale2_struct->tags);
     for (;;) {
         // If the tag pointer is NULL (end of linked list), we did not find

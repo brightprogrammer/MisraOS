@@ -58,6 +58,8 @@ struct BootInfo {
 
     static uint64_t GetMemmapCount();
     static MemMapEntry* GetMemmap();
+
+    static uint64_t GetRSDPAddress();
 private:
     // framebuffer information
     static inline uint64_t fbAddr = 0;
@@ -71,6 +73,9 @@ private:
 
     // store memory region related data
     static inline stivale2_struct_tag_memmap* memmap_tag = nullptr;
+
+    // store rsdp addr
+    static inline uint64_t rsdp_addr;
 };
 
 #endif // BOOTINFO_HPP

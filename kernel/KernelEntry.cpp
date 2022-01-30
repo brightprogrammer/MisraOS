@@ -44,6 +44,9 @@
 #include "GDT.hpp"
 #include "Interrupts.hpp"
 #include "IO.hpp"
+#include "ACPI.hpp"
+#include "Puts.hpp"
+#include "Common.hpp"
 
 // The following will be our kernel's entry point.
 // This function is called by Entry function in Entry.cpp in kernel/Bootloader
@@ -63,7 +66,7 @@ void KernelEntry() {
     // show memory statistics
     pmm.ShowStatistics();
 
-    // create vmm
+    // // create vmm
     VirtualMemoryManager vmm;
     Printf("[+] Created Virtual Memory Manager\n");
 
@@ -77,4 +80,31 @@ void KernelEntry() {
 
     // remap pic
     RemapPIC();
+
+    RSDPDescriptor rsdp;
+
+    SDTHeader* sdtHeader = reinterpret_cast<SDTHeader*>(rsdp.GetSDTAddress());
+    // if rev == 0 then rsdt is used which has 4 bytes for each address
+    // if rev != 0 then xsdt is used which has 8 bytes for each address
+    uint64_t addrsize = rsdp.rev > 0 ? 8 : 4;
+    // total entries except the header
+    uint64_t entries = (sdtHeader->length - sizeof(SDTHeader)) / addrsize;
+    // address of array of address of SDTs is just after table header
+    uint64_t tableAddr = reinterpret_cast<uint64_t>(sdtHeader + 1);
+
+    for(uint64_t i = 0; i < entries; i++){
+        uint64_t sdtaddr;
+        // add phys offset to convert physical to virtual address
+        if(rsdp.rev == 0){
+            sdtaddr = reinterpret_cast<uint32_t*>(tableAddr)[i] + MEM_PHYS_OFFSET;
+        }else{
+            sdtaddr = reinterpret_cast<uint64_t*>(tableAddr)[i] + MEM_PHYS_OFFSET;
+        }
+
+        SDTHeader* sdt = reinterpret_cast<SDTHeader*>(sdtaddr);
+        for(uint8_t j = 0; j < 4; j++){
+            PutChar(sdt->signature[j]);
+        }
+        PutChar('\n');
+    }
 }

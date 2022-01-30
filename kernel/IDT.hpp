@@ -36,7 +36,8 @@
 #ifndef IDT_HPP
 #define IDT_HPP
 
-#include <stdint.h>
+#include "Common.hpp"
+#include <cstdint>
 
 // type attr field structure
 // | 7 | 6,5 | 4 | 3,2,1,0  |
@@ -73,13 +74,13 @@ struct IDTEntry{
 
     void SetOffset(uint64_t offset);
     uint64_t GetOffset();
-} __attribute__((packed));
+} PACKED_STRUCT;
 
 // idtr register structure
 struct IDTR{
     uint16_t limit;
     uint64_t offset;
-} __attribute__((packed));
+} PACKED_STRUCT;
 
 // helper method to set an interrupt descriptor in IDT
 // entry must be the id of interrupt to be handled

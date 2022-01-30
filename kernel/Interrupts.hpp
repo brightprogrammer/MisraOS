@@ -64,7 +64,7 @@ struct InterruptFrame {
     uint64_t rflags;
     uint64_t rsp;
     uint16_t ss;
-} __attribute__((packed));
+} PACKED_STRUCT;
 
 // default exception handlers
 INTERRUPT_API void DefaultInterruptHandlerNoError(InterruptFrame* frame);

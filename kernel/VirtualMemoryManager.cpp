@@ -75,20 +75,36 @@ VirtualMemoryManager::VirtualMemoryManager(){
     CreatePageMap();
 
     MemMapEntry* memmap = BootInfo::GetMemmap();
-    uint64_t memmap_entries = BootInfo::GetMemmapCount();
+    uint64_t memmapCount = BootInfo::GetMemmapCount();
 
     // map first 4 gb of memory to higher half
     // this memeory
-    for(uint64_t p = 0; p < 4*GB; p += PAGE_SIZE){
-        MapMemory(MEM_PHYS_OFFSET + p, p, MAP_PRESENT | MAP_READ_WRITE);
+    // for(uint64_t p = 0; p < 4*GB; p += PAGE_SIZE){
+    //     MapMemory(MEM_PHYS_OFFSET + p, p, MAP_PRESENT | MAP_READ_WRITE);
+    // }
+
+    for(size_t i = 0; i < memmapCount; i++){
+        if(memmap[i].type != STIVALE2_MMAP_KERNEL_AND_MODULES){
+            for(size_t p = 0; p < memmap[i].length; p += PAGE_SIZE){
+                uint64_t paddr = memmap[i].base + p;
+                uint64_t vaddr = MEM_PHYS_OFFSET + paddr;
+                MapMemory(vaddr, paddr, MAP_PRESENT | MAP_READ_WRITE);
+            }
+        }else{
+            for(size_t p = 0; p < memmap[i].length; p += PAGE_SIZE){
+                uint64_t paddr = memmap[i].base + p;
+                uint64_t vaddr = KERNEL_VIRT_BASE + p;
+                MapMemory(vaddr, paddr, MAP_PRESENT | MAP_READ_WRITE);
+            }
+        }
     }
 
-    uint64_t krnlPhysBase = BootInfo::GetKernelPhysicalBase();
-    for (uintptr_t p = 0; p < 2*GB; p += PAGE_SIZE){
-        uint64_t paddr = krnlPhysBase + p;
-        uint64_t vaddr = KERNEL_VIRT_BASE + p;
-        MapMemory(vaddr, paddr, MAP_PRESENT | MAP_READ_WRITE);
-    }
+    // uint64_t krnlPhysBase = BootInfo::GetKernelPhysicalBase();
+    // for (uintptr_t p = 0; p < 2*GB; p += PAGE_SIZE){
+    //     uint64_t paddr = krnlPhysBase + p;
+    //     uint64_t vaddr = KERNEL_VIRT_BASE + p;
+    //     MapMemory(vaddr, paddr, MAP_PRESENT | MAP_READ_WRITE);
+    // }
 
     // load page table into cr3 register
     LoadPageTable();
@@ -101,6 +117,7 @@ void VirtualMemoryManager::CreatePageMap(){
         uint64_t pml4VirtualAddress = PhysicalMemoryManager::AllocatePage();
         pml4PhysicalAddress = pml4VirtualAddress - MEM_PHYS_OFFSET;
         pml4 = reinterpret_cast<PageTable*>(pml4VirtualAddress);
+
         // and set all elements to 0
         memset(pml4, 0, PAGE_SIZE);
     }else{

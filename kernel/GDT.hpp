@@ -37,13 +37,14 @@
 #ifndef GDT_HPP
 #define GDT_HPP
 
-#include <stdint.h>
+#include <cstdint>
+#include "Common.hpp"
 
 // struct to represent gdtr
 struct GDTR{
     uint16_t table_limit;
     uint64_t table_base_address;
-} __attribute__((packed));
+} PACKED_STRUCT;
 
 // implementation of a general segment descriptor
 struct GDTEntry {
@@ -74,7 +75,7 @@ struct GDTEntry {
 
     // finally the higher part of base_address
     uint8_t base_address_high;
-} __attribute__((packed));
+} PACKED_STRUCT;
 
 struct GDT{
     GDTEntry null;
@@ -82,7 +83,7 @@ struct GDT{
     GDTEntry kernelData;
     GDTEntry userCode;
     GDTEntry userData;
-} __attribute__((packed)) __attribute__((aligned(0x1000)));
+} PACKED_STRUCT __attribute__((aligned(0x1000)));
 
 // install kernel's global descriptor table in gdtr
 void InstallGDT();

@@ -45,6 +45,6 @@
 //
 // tags are requested to the bootloader by the kernel and are returned by the bootloader
 // to ther kernel in the form of a linked list.
-void *StivaleGetTag(struct stivale2_struct *tagList, uint64_t id);
+void *GetStivaleTag(struct stivale2_struct *tagList, uint64_t id);
 
 #endif // BOOTLOADER_UTIL_HPP
