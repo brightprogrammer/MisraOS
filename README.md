@@ -16,6 +16,7 @@
 
 More coming soon...
 
+Here is the current # of lines of code. I hope this keeps on increasing :-D
 | Language     | Files | Blank | Comment | Code |
 |:-------------|-------|-------|---------|------|
 | C++          | 20    | 448   | 884     | 1474 |
